@@ -7,13 +7,18 @@ import { useState } from 'react'
 // Import the dependency.
 import clientPromise from '../mongodb-client';
 
-export async function getServerSideProps() {
-//  const res = await fetch('/api/cards')
-//  const data = await res.json()
-    const client = await clientPromise;
-    const collection = await client.db().collection('cards');
-    const cards= await collection.find({}).toArray();
-    const cardList = JSON.parse(JSON.stringify(cards))
+async function fetchCardsFromDB() {
+
+  const client = await clientPromise;
+  const collection = await client.db().collection('cards');
+  const cards= await collection.find({}).toArray();
+  const cardList = JSON.parse(JSON.stringify(cards));
+  return cardList;
+}
+
+export async function getServerSideProps(context) {
+
+const cardList = await fetchCardsFromDB();
 
 return {
     props: {
@@ -29,6 +34,11 @@ export default function Home({cardList}) {
   const fetchCards = async () => {
     const res = await fetch('/api/cards')
     const data = await res.json()
+    if (!data) {
+      return {
+        notFound: true,
+      }
+    }
     setCards(data)
   }
 
