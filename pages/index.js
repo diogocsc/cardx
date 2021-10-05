@@ -1,26 +1,44 @@
+import Link from 'next/link'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import utilStyles from '../styles/utils.module.css'
+import { useState } from 'react'
 
 // Import the dependency.
 import clientPromise from '../mongodb-client';
 
 export async function getStaticProps() {
-  const client = await clientPromise;
-  const collection = await client.db().collection('cards');
-  const cards = await collection.find({}).toArray();
-  const allCards = JSON.parse(JSON.stringify(cards));
-  return {
+//  const res = await fetch('/api/cards')
+//  const data = await res.json()
+    const client = await clientPromise;
+    const collection = await client.db().collection('cards');
+    const cards= await collection.find({}).toArray();
+    const cardList = JSON.parse(JSON.stringify(cards))
+
+return {
     props: {
-      allCards
+      cardList,
     }
   }
 }
 
+export default function Home({cardList}) {
 
+  const [cards, setCards] = useState(cardList);
 
-export default function Home({allCards}) {
+  const fetchCards = async () => {
+    const res = await fetch('/api/cards')
+    const data = await res.json()
+    setCards(data)
+  }
+
+  const deleteCard = async cardId => {
+    const res = await fetch('/api/cards/'+cardId, {
+      method: 'DELETE'
+    })
+    const data = await res.json()
+    fetchCards();
+  }
   return (
     <div className={styles.container}>
       <Head>
@@ -35,22 +53,29 @@ export default function Home({allCards}) {
         </h1>
 
         <p className={styles.description}>
-          Full List
+          Full List {' '}
+          <Link href="/cards/cardEdit">
+            <a>Create Card</a>
+          </Link>
         </p>
 
         <div className={styles.grid}>
         
-          {allCards.map(({ _id, cardText, lastModified }) => (
-              <a
-              href={"https://cardsapi.vercel.app/api/cards/"+_id}
-              className={styles.card}
+          {cards.map(({ _id, cardText, lastModified }) => (
+            <div className={styles.card} key={_id}
             >
+              <a
+              href={"/cards/cardEdit?id="+_id}
+              >
                 {cardText}
                 <br />
                 {_id}
                 <br />
                 {lastModified}
-                </a>
+                {lastModified ? <br /> : ''}
+              </a>
+              <button onClick={() => deleteCard(_id)}> Delete Card</button>
+             </div>
             ))}
             <a href="https://nextjs.org/docs" className={styles.card}>
             <h2>Documentation &rarr;</h2>
