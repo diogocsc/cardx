@@ -7,7 +7,7 @@ import { useState } from 'react'
 // Import the dependency.
 import clientPromise from '../mongodb-client';
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
 //  const res = await fetch('/api/cards')
 //  const data = await res.json()
     const client = await clientPromise;
