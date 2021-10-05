@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 export default function Form() {
     const router = useRouter()
     const cardId = router.query.id
-    console.log('cardiD ' + cardId)
     const submitCard = async event => {
       event.preventDefault()
       const res = cardId ? await fetch(
