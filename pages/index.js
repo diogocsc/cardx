@@ -33,6 +33,7 @@ export default function Home({cardList}) {
 
   const fetchCards = async () => {
     const res = await fetch('/api/cards')
+    console.log(res);
     const data = await res.json()
     if (!data) {
       return {
@@ -46,7 +47,13 @@ export default function Home({cardList}) {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
-    const data = await res.json()
+/*    try {
+      const data = await res.json()
+      
+  } catch(err){
+      console.log('stringify: '+JSON.stringify(res))
+      console.log('Error '+ err);
+  } */
     fetchCards();
   }
   return (

@@ -32,10 +32,15 @@ export default function Form() {
           method: 'POST'
         }
       )
-  
-      const result = await res.json()
+  /*    try {
+        const result = await res.json()
+        
+    } catch(err){
+        console.log(JSON.stringify(res))
+        console.log('Error '+ err);
+    } */
       // result.user => 'Ada Lovelace'
-    }
+    } 
 
     const [cardText, setCardText] = useState('');
 
