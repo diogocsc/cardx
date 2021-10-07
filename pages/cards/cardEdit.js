@@ -1,7 +1,12 @@
 
 import Link from 'next/link'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
+import utilStyles from '../../styles/utils.module.css'
+import styles from '../../styles/Home.module.css'
+
+
 
 
 export default function Form() {
@@ -13,7 +18,9 @@ export default function Form() {
         '/api/cards/'+cardId,
         {
           body: JSON.stringify({
-            cardText: event.target.cardText.value
+            cardText: event.target.cardText.value,
+            cardUsers: event.target.cardUsers.value,
+            source: event.target.source.value
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -24,7 +31,9 @@ export default function Form() {
         '/api/cards/insertCard',
         {
           body: JSON.stringify({
-            cardText: event.target.cardText.value
+            cardText: event.target.cardText.value,
+            cardUsers: event.target.cardUsers.value,
+            source: event.target.source.value
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -32,23 +41,15 @@ export default function Form() {
           method: 'POST'
         }
       )
-  /*    try {
-        const result = await res.json()
-        
-    } catch(err){
-        console.log(JSON.stringify(res))
-        console.log('Error '+ err);
-    } */
-      // result.user => 'Ada Lovelace'
+
     } 
 
-    const [cardText, setCardText] = useState('');
+    const [card, setCard] = useState('');
 
     const fetchCard = async () => {
       const res = await fetch('/api/cards/'+cardId)
       const card = await res.json()
-      setCardText(card.cardText);
-      
+      setCard(card);
     }
 
     useEffect( () => {
@@ -56,18 +57,32 @@ export default function Form() {
     }, [cardId])
   
     return (
-      <form onSubmit={submitCard}>
-        <label htmlFor="cardText">Card Text</label>
-        <br />
-        <textarea id="cardText" name="cardText" type="text" defaultValue={cardText} required />
-        <br />
-        <button type="submit">Submit</button>
-        <br />
-        <Link href="/">
-            <a>Back home!</a>
-        </Link>
-      </form>
-    
+      <div className={styles.container}>
+        <Head>
+          <title>CardX - {cardId ? 'Edit' : 'New Card'}</title>
+          <meta name="description" content="The place to edit or create cards" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <form onSubmit={submitCard}>
+          <label htmlFor="cardText">Card Text</label>
+          <br />
+          <textarea cols="30" rows="5" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
+          <br />
+          <label htmlFor="cardUsers">To whom is this card designed for?</label>
+          <br />
+          <textarea cols="30" rows="5" id="cardUsers" name="cardUsers" type="text" defaultValue={card.cardUsers} />
+          <br />
+          <label htmlFor="source">Where have you found inspiration for this card?</label>
+          <br />
+          <textarea cols="30" rows="5" id="source" name="source" type="text" defaultValue={card.source} />
+          <br />
+          <button type="submit">Submit</button>
+          <br />
+          <Link href="/">
+              <a>Back home!</a>
+          </Link>
+        </form>
+      </div>
     )
   }
   

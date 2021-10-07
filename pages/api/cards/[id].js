@@ -13,7 +13,7 @@ export default async (req, res) => {
             res.json(r);
         }
         else if(req.method == 'PATCH'){
-            const card = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "cardText": req.body.cardText},
+            const card = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "cardText": req.body.cardText, "cardUsers": req.body.cardUsers, "source": req.body.source},
             $currentDate: { lastModified: true } });
             res.json(card);
         }

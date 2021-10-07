@@ -11,7 +11,8 @@ async function fetchCardsFromDB() {
 
   const client = await clientPromise;
   const collection = await client.db().collection('cards');
-  const cards= await collection.find({}).toArray();
+  let mySort= {createdOn:-1, lastModified: -1, cardText: 1};
+  const cards= await collection.find().sort(mySort).toArray();
   const cardList = JSON.parse(JSON.stringify(cards));
   return cardList;
 }
@@ -78,7 +79,7 @@ export default function Home({cardList}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, lastModified }) => (
+          {cards.map(({ _id, cardText, createdOn, lastModified }) => (
             <div className={styles.card} key={_id}
             >
               <a
@@ -88,6 +89,8 @@ export default function Home({cardList}) {
                 <br />
                 {_id}
                 <br />
+                {createdOn ?  'Created On: ' + createdOn : ''}
+                {createdOn ? <br /> : ''}
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>

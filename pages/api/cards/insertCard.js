@@ -9,7 +9,10 @@ export default async (req, res) => {
     const client = await clientPromise;
     const collection = await client.db().collection('cards');
     const card = {
-      cardText: req.body.cardText
+      cardText: req.body.cardText,
+      cardUsers: req.body.cardUsers,
+      source: req.body.source,
+      createdOn: new Date()
     }
     try {
       const c= await collection.insertOne(card);

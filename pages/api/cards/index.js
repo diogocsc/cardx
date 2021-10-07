@@ -9,7 +9,8 @@ export default async (req, res) => {
     const client = await clientPromise;
     const collection = await client.db().collection('cards');
     try {
-      const cards= await collection.find({}).toArray();
+      let mySort= {createdOn:-1};
+      const cards= await collection.find().sort(mySort).toArray();
       res.json(cards);
 
   } catch(err){
