@@ -64,19 +64,27 @@ export default function Form() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <form onSubmit={submitCard}>
-          <label htmlFor="cardText">Card Text</label>
-          <br />
-          <textarea cols="30" rows="5" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
-          <br />
-          <label htmlFor="cardUsers">To whom is this card designed for?</label>
-          <br />
-          <textarea cols="30" rows="5" id="cardUsers" name="cardUsers" type="text" defaultValue={card.cardUsers} />
-          <br />
-          <label htmlFor="source">Where have you found inspiration for this card?</label>
-          <br />
-          <textarea cols="30" rows="5" id="source" name="source" type="text" defaultValue={card.source} />
-          <br />
-          <button type="submit">Submit</button>
+        <label className={utilStyles.input_label} htmlFor="cardText">Card Text</label>
+
+        <div className={utilStyles.input}>
+
+          <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
+         </div>
+         <label className={utilStyles.input_label} htmlFor="cardUsers">To whom is this card designed for?</label>
+
+         <div className={utilStyles.input}>
+
+          <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardUsers" name="cardUsers" type="text" defaultValue={card.cardUsers} />
+
+          </div>
+          <label className={utilStyles.input_label} htmlFor="source">Where have you found inspiration to create this card?</label>
+
+          <div className={utilStyles.input}>
+
+           <textarea className={utilStyles.input_field} cols="30" rows="3" id="source" name="source" type="text" defaultValue={card.source} />
+          </div>
+
+          <button className={utilStyles.card_button} type="submit">Submit</button>
           <br />
           <Link href="/">
               <a>Back home!</a>
