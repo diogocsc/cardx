@@ -19,6 +19,7 @@ export default function Form() {
         {
           body: JSON.stringify({
             cardText: event.target.cardText.value,
+            category: event.target.category.value,
             cardUsers: event.target.cardUsers.value,
             source: event.target.source.value
           }),
@@ -32,6 +33,7 @@ export default function Form() {
         {
           body: JSON.stringify({
             cardText: event.target.cardText.value,
+            category: event.target.category.value,
             cardUsers: event.target.cardUsers.value,
             source: event.target.source.value
           }),
@@ -70,6 +72,17 @@ export default function Form() {
 
           <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
          </div>
+         
+        <label className={utilStyles.input_label} htmlFor="category">What's the card category?</label>
+
+        <div className={utilStyles.input}>
+        <select name="category" id="category-select" value={card.category} >
+            <option value="">--Please choose an option--</option>
+            <option value="Q">Quebra-Gelo</option>
+            <option value="P">Profunda</option>
+            <option value="D">Divertida</option>
+        </select>
+        </div>
          <label className={utilStyles.input_label} htmlFor="cardUsers">To whom is this card designed for?</label>
 
          <div className={utilStyles.input}>

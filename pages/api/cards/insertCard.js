@@ -10,6 +10,7 @@ export default async (req, res) => {
     const collection = await client.db().collection('cards');
     const card = {
       cardText: req.body.cardText,
+      category: req.body.category,
       cardUsers: req.body.cardUsers,
       source: req.body.source,
       createdOn: new Date()

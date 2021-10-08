@@ -48,13 +48,7 @@ export default function Home({cardList}) {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
-/*    try {
-      const data = await res.json()
-      
-  } catch(err){
-      console.log('stringify: '+JSON.stringify(res))
-      console.log('Error '+ err);
-  } */
+
     fetchCards();
   }
   return (
