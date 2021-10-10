@@ -79,7 +79,7 @@ export default function Home({cardList, email,name}) {
 
 
         <h1>
-          {name} 's Cards
+          {name} Cards
         </h1>
 
         <p className={styles.description}>
