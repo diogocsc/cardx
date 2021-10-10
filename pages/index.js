@@ -38,7 +38,6 @@ export default function Home({cardList}) {
 
   const fetchCards = async () => {
     const res = await fetch('/api/cards')
-    console.log(res);
     const data = await res.json()
     if (!data) {
       return {
@@ -101,9 +100,8 @@ export default function Home({cardList}) {
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
-              {createdBy && <a href={"/cards/"+createdBy+"?name="+createdByName}>
+              {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
-           
                 {createdBy &&  <br /> }
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}

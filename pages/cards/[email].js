@@ -6,17 +6,17 @@ import Layout from '../../components/layout'
 import { useSession } from 'next-auth/client'
 import AccessDenied from '../../components/access-denied'
 
-
+"uee strict";
 
 // Import the dependency.
 import clientPromise from '../../mongodb-client';
 
 async function fetchCardsFromDB(context) {
-
+  const email=Buffer.from(context.query.email, 'base64').toString();
   const client = await clientPromise;
   const collection = await client.db().collection('cards');
   let mySort= {createdOn:-1, lastModified: -1, cardText: 1};
-  const cards= await collection.find({createdBy:context.query.email}).sort(mySort).toArray();
+  const cards= await collection.find({createdBy:email}).sort(mySort).toArray();
   const cardList = JSON.parse(JSON.stringify(cards));
   return cardList;
 }
