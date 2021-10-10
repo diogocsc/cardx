@@ -1,8 +1,12 @@
 import Link from 'next/link'
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { useState } from 'react'
+import Layout from '../components/layout'
+import { useSession } from 'next-auth/client'
+import AccessDenied from '../components/access-denied'
+
+
 
 // Import the dependency.
 import clientPromise from '../mongodb-client';
@@ -29,7 +33,7 @@ return {
 }
 
 export default function Home({cardList}) {
-
+  const [ session, loading ] = useSession();
   const [cards, setCards] = useState(cardList);
 
   const fetchCards = async () => {
@@ -51,15 +55,26 @@ export default function Home({cardList}) {
 
     fetchCards();
   }
+
+  
+  // When rendering client side don't display anything until loading is complete
+  if (typeof window !== 'undefined' && loading) return null
+
+  // If no session exists, display access denied message
+  if (!session) { return  <Layout><AccessDenied/></Layout> }
+
+
+  // If session exists, display content
   return (
-    <div className={styles.container}>
+    <Layout>
+
       <Head>
         <title>CardX</title>
         <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
+
         <h1 className={styles.title}>
           Cards
         </h1>
@@ -119,20 +134,8 @@ export default function Home({cardList}) {
             </p>
           </a>
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
-    </div>
+      </Layout>
+    
   )
 }
