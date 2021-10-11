@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import utilStyles from '../../styles/utils.module.css'
 import styles from '../../styles/Home.module.css'
-
+import { Text } from "react";
 
 
 
@@ -21,7 +21,8 @@ export default function Form() {
             cardText: event.target.cardText.value,
             category: event.target.category.value,
             cardUsers: event.target.cardUsers.value,
-            source: event.target.source.value
+            source: event.target.source.value,
+            ownedBy: event.target.ownedBy.value.split(","),
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -43,6 +44,7 @@ export default function Form() {
           method: 'POST'
         }
       )
+      alert("Card Submitted");
 
     } 
 
@@ -96,6 +98,8 @@ export default function Form() {
 
            <textarea className={utilStyles.input_field} cols="30" rows="3" id="source" name="source" type="text" defaultValue={card.source} />
           </div>
+
+            <input className={utilStyles.input_field} style={{display:"none"}} id="ownedBy" name="ownedBy" type="text" defaultValue={card.ownedBy} />
 
           <button className={utilStyles.card_button} type="submit">Submit</button>
           <br />

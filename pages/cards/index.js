@@ -51,7 +51,6 @@ export default function Home({cardList}) {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
-
     fetchCards();
   }
 
