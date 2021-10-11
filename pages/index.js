@@ -37,8 +37,8 @@ export default function Home({cardList, email,name}) {
   const [ session, loading ] = useSession();
   const [cards, setCards] = useState(cardList);
 
-  const fetchCards = async () => {
-    const res = await fetch('/api/cards')
+  const fetchCards = async (uri) => {
+    const res = await fetch(uri)
     console.log(res);
     const data = await res.json()
     if (!data) {
@@ -49,12 +49,36 @@ export default function Home({cardList, email,name}) {
     setCards(data)
   }
 
+
   const deleteCard = async cardId => {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
 
-    fetchCards();
+    fetchCards('/api/cards/');
+  }
+  const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
+    const index = ownedBy.indexOf(email);
+    ownedBy.splice(index,1);
+
+    const res = await fetch(
+      '/api/cards/'+cardId,
+      {
+        body: JSON.stringify({
+          cardText: cardText,
+          category: category,
+          cardUsers: cardUsers,
+          source: source,
+          ownedBy: ownedBy,
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PATCH'
+      }
+    )
+
+    fetchCards('/api/cards/my');
   }
 
   
@@ -92,7 +116,7 @@ export default function Home({cardList, email,name}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName }) => (
+          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
             <div className={styles.card} key={_id}
             >
               <a
@@ -107,8 +131,7 @@ export default function Home({cardList, email,name}) {
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
-                <button onClick={() => deleteCard(_id)}> Delete Card</button>}
+               <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> DisOwn Card</button>
              </div>
             ))}
         </div>
