@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
-import { useSession } from 'next-auth/client'
+import { useSession, getSession } from 'next-auth/client'
 import AccessDenied from '../../components/access-denied'
 
 
@@ -11,19 +11,19 @@ import AccessDenied from '../../components/access-denied'
 // Import the dependency.
 import clientPromise from '../../mongodb-client';
 
-async function fetchCardsFromDB() {
+async function fetchCardsFromDB(session) {
 
   const client = await clientPromise;
   const collection = await client.db().collection('cards');
   let mySort= {createdOn:-1, lastModified: -1, cardText: 1};
-  const cards= await collection.find().sort(mySort).toArray();
+  const cards= await collection.find({ownedBy:{$ne: session.user.email}}).sort(mySort).toArray();
   const cardList = JSON.parse(JSON.stringify(cards));
   return cardList;
 }
 
 export async function getServerSideProps(context) {
-
-const cardList = await fetchCardsFromDB();
+  const session = await getSession(context);
+  const cardList = session ? await fetchCardsFromDB(session): '';  
 
 return {
     props: {
@@ -77,6 +77,7 @@ export default function Home({cardList}) {
         method: 'PATCH'
       }
     )
+    fetchCards();
   }
 
   
@@ -99,7 +100,7 @@ export default function Home({cardList}) {
 
 
         <h1 className={styles.title}>
-          Cards
+          Others Cards
         </h1>
 
         <p className={styles.description}>

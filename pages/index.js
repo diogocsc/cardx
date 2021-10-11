@@ -110,7 +110,7 @@ export default function Home({cardList, email,name}) {
           </Link>
           { } | { }
           <Link href="/cards/">
-            <a>All Cards</a>
+            <a>Other Cards</a>
           </Link>
         </p>
 
