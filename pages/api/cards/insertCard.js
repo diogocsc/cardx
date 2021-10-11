@@ -19,7 +19,9 @@ export default async (req, res) => {
       source: req.body.source,
       createdBy: session.user.email,
       createdByName: session.user.name,
-      createdOn: new Date()
+      ownedBy: [session.user.email],
+      createdOn: new Date(),
+
     }
     try {
       const c= await collection.insertOne(card);
