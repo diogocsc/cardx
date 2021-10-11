@@ -55,6 +55,30 @@ export default function Home({cardList}) {
     fetchCards();
   }
 
+  const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
+    if (ownedBy) {
+     ownedBy.push(email);
+    }
+    else ownedBy=[email];
+
+    const res = await fetch(
+      '/api/cards/'+cardId,
+      {
+        body: JSON.stringify({
+          cardText: cardText,
+          category: category,
+          cardUsers: cardUsers,
+          source: source,
+          ownedBy: ownedBy,
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PATCH'
+      }
+    )
+  }
+
   
   // When rendering client side don't display anything until loading is complete
   if (typeof window !== 'undefined' && loading) return null
@@ -91,7 +115,7 @@ export default function Home({cardList}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName }) => (
+          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName, ownedBy,category, cardUsers, source }) => (
             <div className={styles.card} key={_id}
             >
               <a
@@ -107,6 +131,7 @@ export default function Home({cardList}) {
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
+                <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
