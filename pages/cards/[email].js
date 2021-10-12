@@ -39,8 +39,8 @@ export default function Home({cardList, email,name}) {
   const [ session, loading ] = useSession();
   const [cards, setCards] = useState(cardList);
 
-  const fetchCards = async () => {
-    const res = await fetch('/api/cards')
+  const fetchCards = async (uri) => {
+    const res = await fetch(uri)
     console.log(res);
     const data = await res.json()
     if (!data) {
@@ -51,14 +51,38 @@ export default function Home({cardList, email,name}) {
     setCards(data)
   }
 
-  const deleteCard = async cardId => {
+  const deleteCard = async (cardId,createdBy) => {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
 
-    fetchCards();
+    fetchCards('/api/cards/user/'+btoa(unescape(encodeURIComponent(createdBy))));
   }
 
+  const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, createdBy) => {
+    if (ownedBy) {
+     ownedBy.push(email);
+    }
+    else ownedBy=[email];
+
+    const res = await fetch(
+      '/api/cards/'+cardId,
+      {
+        body: JSON.stringify({
+          cardText: cardText,
+          category: category,
+          cardUsers: cardUsers,
+          source: source,
+          ownedBy: ownedBy,
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PATCH'
+      }
+    )
+    alert("Card Owned")
+  }
   
   // When rendering client side don't display anything until loading is complete
   if (typeof window !== 'undefined' && loading) return null
@@ -81,7 +105,7 @@ export default function Home({cardList, email,name}) {
 
 
         <h1>
-          {name} Cards
+         Cards created by {name} 
         </h1>
 
         <p className={styles.description}>
@@ -96,7 +120,7 @@ export default function Home({cardList, email,name}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName }) => (
+          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName,ownedBy, category, cardUsers, source }) => (
             <div className={styles.card} key={_id}>
              { createdBy===session.user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
@@ -121,6 +145,8 @@ export default function Home({cardList, email,name}) {
                 {lastModified ? <br /> : ''}
                 </div>
               }
+               <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
+
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
