@@ -48,10 +48,12 @@ export default function Home({cardList}) {
   }
 
   const deleteCard = async cardId => {
+    if (confirm("This will permanently delete the card for all users. Do you really want to delete this card? ")) {
     const res = await fetch('/api/cards/'+cardId, {
       method: 'DELETE'
     })
     fetchCards();
+  }
   }
 
   const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
