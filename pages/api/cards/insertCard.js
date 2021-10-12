@@ -17,7 +17,7 @@ export default async (req, res) => {
       category: req.body.category,
       cardUsers: req.body.cardUsers,
       source: req.body.source,
-      url= req.body.url,
+      url: req.body.url,
       createdBy: session.user.email,
       createdByName: session.user.name,
       ownedBy: [session.user.email],
