@@ -88,8 +88,9 @@ export default function Home({cardList, email,name}) {
   // If no session exists, display access denied message
   if (!session) { return  <Layout><AccessDenied/></Layout> }
 
-
   // If session exists, display content
+  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+
   return (
     <Layout>
 
@@ -117,20 +118,29 @@ export default function Home({cardList, email,name}) {
         <div className={styles.grid}>
         
           {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
-            <div className={styles.card} key={_id}
-            >
-              <a
-              href={"/cards/cardEdit?id="+_id}
-              >
+            <div className={styles.card} key={_id}>
+              { createdBy===session.user.email || isAdmin ?
+              <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />
-                {createdBy && 'Created By: '+createdByName }
-                {createdBy &&  <br /> }
                 {createdOn ?  'Created On: ' + createdOn : ''}
                 {createdOn ? <br /> : ''}
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
+              :
+                <div>
+                {cardText}
+                <br />
+                {createdOn ?  'Created On: ' + createdOn : ''}
+                {createdOn ? <br /> : ''}
+                {lastModified}
+                {lastModified ? <br /> : ''}
+                </div>
+              }
+              {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
+              Created By: {createdByName}</a>}
+                {createdBy &&  <br /> }
                <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> DisOwn Card</button>
              </div>
             ))}

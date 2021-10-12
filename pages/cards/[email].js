@@ -68,6 +68,8 @@ export default function Home({cardList, email,name}) {
 
 
   // If session exists, display content
+  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+
   return (
     <Layout>
 
@@ -88,18 +90,16 @@ export default function Home({cardList, email,name}) {
           </Link>
           { } | { }
           <Link href="/">
-            <a>All Cards</a>
+            <a>My Cards</a>
           </Link>
         </p>
 
         <div className={styles.grid}>
         
           {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName }) => (
-            <div className={styles.card} key={_id}
-            >
-              <a
-              href={"/cards/cardEdit?id="+_id}
-              >
+            <div className={styles.card} key={_id}>
+             { createdBy===session.user.email || isAdmin ?
+              <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />
                 {createdBy && 'Created By: '+createdByName }
@@ -109,6 +109,18 @@ export default function Home({cardList, email,name}) {
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
+              :
+                <div>
+                {cardText}
+                <br />
+                {createdBy && 'Created By: '+createdByName }
+                {createdBy &&  <br /> }
+                {createdOn ?  'Created On: ' + createdOn : ''}
+                {createdOn ? <br /> : ''}
+                {lastModified}
+                {lastModified ? <br /> : ''}
+                </div>
+              }
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
