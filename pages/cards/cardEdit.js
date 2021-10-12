@@ -5,11 +5,11 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import utilStyles from '../../styles/utils.module.css'
 import styles from '../../styles/Home.module.css'
-import { Text } from "react";
-
 
 
 export default function Form() {
+
+  
     const router = useRouter()
     const cardId = router.query.id
     async function submitCard(event, ownedBy) {
@@ -56,12 +56,18 @@ export default function Form() {
       const res = await fetch('/api/cards/'+cardId)
       const card = await res.json()
       setCard(card);
+      setSelected(card.category);
     }
 
     useEffect( () => {
       cardId ? fetchCard() : ''
     }, [cardId])
   
+
+    const [selected, setSelected] = useState(card.category);
+
+    function handleChange(event) {  setSelected(event.target.value);  }
+
     return (
       <div className={styles.container}>
         <Head>
@@ -80,7 +86,7 @@ export default function Form() {
         </div>
         <label className={utilStyles.input_label} htmlFor="category">What is the card category?</label>
         <div className={utilStyles.input}>
-        <select name="category" id="category-select" value={card.category} >
+        <select name="category" id="category-select" value={selected} onChange={(event) => handleChange(event)}>
             <option value="">--Please choose an option--</option>
             <option value="Q">Quebra-Gelo</option>
             <option value="P">Profunda</option>
