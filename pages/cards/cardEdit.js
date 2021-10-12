@@ -22,6 +22,7 @@ export default function Form() {
           category: event.target.category.value,
           cardUsers: event.target.cardUsers.value,
           source: event.target.source.value,
+          url: event.target.url.value,
           ownedBy: ownedBy,
         }),
         headers: {
@@ -36,7 +37,8 @@ export default function Form() {
           cardText: event.target.cardText.value,
           category: event.target.category.value,
           cardUsers: event.target.cardUsers.value,
-          source: event.target.source.value
+          source: event.target.source.value,
+          url: event.target.url.value,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -69,14 +71,14 @@ export default function Form() {
         </Head>
         <form onSubmit={(event) => submitCard(event, card.ownedBy)}>
         <label className={utilStyles.input_label} htmlFor="cardText">Card Text</label>
-
         <div className={utilStyles.input}>
-
           <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
-         </div>
-         
+        </div>
+        <label className={utilStyles.input_label} htmlFor="url">Card Image URL</label>
+        <div className={utilStyles.input}>
+          <input className={utilStyles.input_field} id="url" name="url" type="text" defaultValue={card.url} />
+        </div>
         <label className={utilStyles.input_label} htmlFor="category">What is the card category?</label>
-
         <div className={utilStyles.input}>
         <select name="category" id="category-select" value={card.category} >
             <option value="">--Please choose an option--</option>
@@ -85,27 +87,21 @@ export default function Form() {
             <option value="D">Divertida</option>
         </select>
         </div>
-         <label className={utilStyles.input_label} htmlFor="cardUsers">To whom is this card designed for?</label>
-
-         <div className={utilStyles.input}>
-
+        <label className={utilStyles.input_label} htmlFor="cardUsers">To whom is this card designed for?</label>
+        <div className={utilStyles.input}>
           <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardUsers" name="cardUsers" type="text" defaultValue={card.cardUsers} />
-
-          </div>
-          <label className={utilStyles.input_label} htmlFor="source">Where have you found inspiration to create this card?</label>
-
-          <div className={utilStyles.input}>
-
+        </div>
+        <label className={utilStyles.input_label} htmlFor="source">Where have you found inspiration to create this card?</label>
+        <div className={utilStyles.input}>
            <textarea className={utilStyles.input_field} cols="30" rows="3" id="source" name="source" type="text" defaultValue={card.source} />
-          </div>
-
-          <button className={utilStyles.card_button} type="submit">Submit</button>
-          <br />
-          <Link href="/">
-              <a>Back home!</a>
-          </Link>
-        </form>
-      </div>
+        </div>
+        <button className={utilStyles.card_button} type="submit">Submit</button>
+        <br />
+        <Link href="/">
+            <a>Back home!</a>
+        </Link>
+      </form>
+    </div>
     )
   }
   

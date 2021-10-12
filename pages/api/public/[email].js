@@ -22,7 +22,7 @@ export default async (req, res) => {
         const collection = await client.db().collection('cards');
         try {
             let mySort= {createdOn:-1, lastModified: -1, cardText: 1};
-            const cards= await collection.find({ownedBy: email},{projection: {cardText: 1, _id:0}}).sort(mySort).toArray();
+            const cards= await collection.find({ownedBy: email},{projection: {cardText: 1, url:1, _id:0}}).sort(mySort).toArray();
             res.json(cards);
         } catch(err){
             res.send('Error '+ err);

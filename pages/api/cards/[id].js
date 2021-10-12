@@ -17,7 +17,7 @@ export default async (req, res) => {
                 res.json(r);
             }
             else if(req.method == 'PATCH'){
-                const card = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "cardText": req.body.cardText,"category": req.body.category, "cardUsers": req.body.cardUsers, "source": req.body.source, "ownedBy": req.body.ownedBy},
+                const card = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "cardText": req.body.cardText,"category": req.body.category, "cardUsers": req.body.cardUsers, "source": req.body.source, "ownedBy": req.body.ownedBy, "url": req.body.url},
                 $currentDate: { lastModified: true } });
                 res.json(card);
             }
