@@ -10,20 +10,20 @@ export default async (req, res) => {
     if (session) {
 
         const client = await clientPromise;
-        const collection = await client.db().collection('cards');
+        const collection = await client.db().collection('decks');
         try {
             if(req.method == 'DELETE'){
                 const r= await collection.deleteOne({_id: ObjectId(req.query.id)});
                 res.json(r);
             }
             else if(req.method == 'PATCH'){
-                const card = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "cardText": req.body.cardText,"category": req.body.category, "cardUsers": req.body.cardUsers, "source": req.body.source, "ownedBy": req.body.ownedBy, "url": req.body.url, "decks": req.body.decks},
+                const deck = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "name": req.body.name, "description": req.body.description, "ownedBy": req.body.ownedBy, "url": req.body.url},
                 $currentDate: { lastModified: true } });
-                res.json(card);
+                res.json(deck);
             }
             else {
-                const card = await collection.findOne({_id: ObjectId(req.query.id)});
-                res.json(card);
+                const deck = await collection.findOne({_id: ObjectId(req.query.id)});
+                res.json(deck);
             }
 
         } catch(err){

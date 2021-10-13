@@ -21,21 +21,35 @@ async function fetchCardsFromDB(context, session) {
   return cardList;
 }
 
+async function fetchDecksFromDB(session) {
+
+  const client = await clientPromise;
+  const collection = await client.db().collection('decks');
+  let mySort= {createdOn:-1, lastModified: -1, name: 1};
+  const decks= await collection.find({ownedBy: session.user.email}).sort(mySort).toArray();
+  const deckList = JSON.parse(JSON.stringify(decks));
+  return deckList;
+}
+
 export async function getServerSideProps(context) {
 const session = await getSession(context);
 const cardList = session ? await fetchCardsFromDB(context, session): '';
+const deckList = session ? await fetchDecksFromDB(session): '';
 
 
 return {
     props: {
-      cardList
+      cardList,
+      deckList,
     }
   }
 }
 
-export default function Home({cardList, email,name}) {
+export default function Home({cardList, deckList}) {
   const [ session, loading ] = useSession();
   const [cards, setCards] = useState(cardList);
+  const [decks, setDecks] = useState(deckList);
+
 
   const fetchCards = async (uri) => {
     const res = await fetch(uri)
@@ -49,15 +63,22 @@ export default function Home({cardList, email,name}) {
     setCards(data)
   }
 
-
-  const deleteCard = async cardId => {
-    const res = await fetch('/api/cards/'+cardId, {
-      method: 'DELETE'
-    })
-
-    fetchCards('/api/cards/');
+  
+  const fetchDecks = async (uri) => {
+    const res = await fetch(uri)
+    console.log(res);
+    const data = await res.json()
+    if (!data) {
+      return {
+        notFound: true,
+      }
+    }
+    setDecks(data)
   }
-  const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
+
+
+
+ const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
     const index = ownedBy.indexOf(email);
     ownedBy.splice(index,1);
 
@@ -80,6 +101,27 @@ export default function Home({cardList, email,name}) {
 
     fetchCards('/api/cards/my');
   }
+  const removeDeck = async (deckId, email, ownedBy, name, description) => {
+    const index = ownedBy.indexOf(email);
+    ownedBy.splice(index,1);
+
+    const res = await fetch(
+      '/api/decks/'+deckId,
+      {
+        body: JSON.stringify({
+          name: name,
+          description: description,
+          ownedBy: ownedBy,
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PATCH'
+      }
+    )
+
+    fetchDecks('/api/decks/my');
+  }
 
   
   // When rendering client side don't display anything until loading is complete
@@ -95,11 +137,54 @@ export default function Home({cardList, email,name}) {
     <Layout>
 
       <Head>
-        <title>CardX - {name}</title>
+        <title>CardX</title>
         <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <h1>
+          My Decks
+        </h1>
 
+        <p className={styles.description}>
+          <Link href="/decks/deckEdit">
+            <a>Create Deck</a>
+          </Link>
+          { } | { }
+          <Link href="/decks/">
+            <a>Other Decks</a>
+          </Link>
+        </p>
+
+        <div className={styles.grid}>
+        
+          {decks.map(({ _id, name, description, createdBy, createdByName,lastModified, createdOn, ownedBy }) => (
+            <div className={styles.card} key={_id}>
+              { createdBy===session.user.email || isAdmin ?
+              <a href={"/decks/"+_id} >
+                {name}
+                <br />
+                {createdOn ?  'Created On: ' + createdOn : ''}
+                {createdOn ? <br /> : ''}
+                {lastModified}
+                {lastModified ? <br /> : ''}
+              </a>
+              :
+                <div>
+                {name}
+                <br />
+                {createdOn ?  'Created On: ' + createdOn : ''}
+                {createdOn ? <br /> : ''}
+                {lastModified}
+                {lastModified ? <br /> : ''}
+                </div>
+              }
+              {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
+              Created By: {createdByName}</a>}
+                {createdBy &&  <br /> }
+               <button onClick={() => removeDeck(_id,session.user.email, ownedBy,name,description)}> DisOwn Deck</button>
+             </div>
+            ))}
+        </div>
 
         <h1>
           My Cards

@@ -11,14 +11,11 @@ export default async (req, res) => {
   if (session) {
 
     const client = await clientPromise;
-    const collection = await client.db().collection('cards');
-    const card = {
-      cardText: req.body.cardText,
-      category: req.body.category,
-      cardUsers: req.body.cardUsers,
-      source: req.body.source,
+    const collection = await client.db().collection('decks');
+    const deck = {
+      name: req.body.name,
+      description: req.body.description,
       url: req.body.url,
-      decks: req.body.decks,
       createdBy: session.user.email,
       createdByName: session.user.name,
       ownedBy: [session.user.email],
@@ -26,7 +23,7 @@ export default async (req, res) => {
 
     }
     try {
-      const c= await collection.insertOne(card);
+      const c= await collection.insertOne(deck);
       res.json(c);
 
   } catch(err){
