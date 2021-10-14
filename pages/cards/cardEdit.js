@@ -71,6 +71,78 @@ export default function Form({deckList,otherDeckList}) {
     const [otherDecks, setOtherDecks] = useState(otherDeckList);
     const [card, setCard] = useState('');
 
+
+    const fetchDecks = async () => {
+      let res = await fetch('/api/cards/'+cardId+'/decks')
+      let data = await res.json()
+      setDecks(data)
+      res = await fetch('/api/cards/'+cardId+'/otherDecks')
+      data = await res.json()
+      setOtherDecks(data)
+    }
+
+    function cardDecks() {
+
+     return( <>
+     <h2> Card Decks  </h2>
+     <div className={styles.grid}>
+
+       {decks.map(({ _id, name, description, createdBy, createdByName }) => (
+         <div className={styles.deck} key={_id}>
+           {createdBy === session.user.email || isAdmin ?
+             <a href={"/decks/deckEdit?id=" + _id}>
+               {name} <br />
+               {description}
+             </a>
+             :
+             <div>
+               {name} <br />
+               {description}
+             </div>}
+           <br />
+           {createdBy && <a href={"/decks/" + btoa(unescape(encodeURIComponent(createdBy))) + "?name=" + createdByName}>
+             Created By: {createdByName}</a>}
+           {createdBy && <br />}
+           <button onClick={() => removeDeckFromCard(_id)}> Remove Deck from Card</button>
+         </div>
+       ))}
+
+     </div></>)
+
+    }
+
+    function otherCardDecks(){
+      return(<>
+      <h2> Other Decks  </h2>
+      <div className={styles.grid}>
+      
+        {otherDecks.map(({ _id, name, createdBy, createdByName,description }) => (
+          <div className={styles.deck} key={_id} >
+            { createdBy===session.user.email || isAdmin ?
+            <a href={"/decks/deckEdit?id="+_id} >
+              {name}<br /> 
+              {description}
+            </a>
+            :
+              <div>
+              {name}<br /> 
+              {description}
+              </div>
+            }
+            <br /> 
+            {createdBy && <a href={"/decks/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
+            Created By: {createdByName}</a>}
+              {createdBy &&  <br /> }
+              <button onClick={() => addDeckToCard(_id)}> Add Deck to Card</button>
+           </div>
+          ))}
+         
+      </div> </>)
+
+
+
+    }
+
     async function updateCardDecks(decks){
 
       await fetch(
@@ -100,7 +172,7 @@ export default function Form({deckList,otherDeckList}) {
         newDecks = card.decks;
       }
       await updateCardDecks(newDecks)
-      alert("Deck Added")
+      fetchDecks()
   
     } 
 
@@ -112,7 +184,7 @@ export default function Form({deckList,otherDeckList}) {
         newDecks = card.decks;
       }
       await updateCardDecks(newDecks)
-      alert("Deck Removed")
+      fetchDecks()
   
     } 
 
@@ -162,7 +234,7 @@ export default function Form({deckList,otherDeckList}) {
       const res = await fetch('/api/cards/'+cardId)
       const card = await res.json()
       setCard(card);
-      setSelected(card.category);
+ //     setSelected(card.category);
     }
 
     useEffect( () => {
@@ -170,10 +242,17 @@ export default function Form({deckList,otherDeckList}) {
     }, [cardId])
   
 
-    const [selected, setSelected] = useState(card.category);
+/*    const [selected, setSelected] = useState(card.category);
 
     function handleChange(event) {  setSelected(event.target.value);  }
 
+        <select name="category" id="category-select" value={selected} onChange={(event) => handleChange(event)}>
+            <option value="">--Please choose an option--</option>
+            <option value="Q">Quebra-Gelo</option>
+            <option value="P">Profunda</option>
+            <option value="D">Divertida</option>
+        </select>
+*/
       // When rendering client side don't display anything until loading is complete
   if (typeof window !== 'undefined' && loading) return null
 
@@ -202,12 +281,7 @@ export default function Form({deckList,otherDeckList}) {
         </div>
         <label className={utilStyles.input_label} htmlFor="category">What is the card category?</label>
         <div className={utilStyles.input}>
-        <select name="category" id="category-select" value={selected} onChange={(event) => handleChange(event)}>
-            <option value="">--Please choose an option--</option>
-            <option value="Q">Quebra-Gelo</option>
-            <option value="P">Profunda</option>
-            <option value="D">Divertida</option>
-        </select>
+          <input placeholder="Example: P, Q, D" className={utilStyles.input_field} id="category" name="url" type="text" defaultValue={card.category} />
         </div>
         <label className={utilStyles.input_label} htmlFor="cardUsers">To whom is this card designed for?</label>
         <div className={utilStyles.input}>
@@ -224,79 +298,10 @@ export default function Form({deckList,otherDeckList}) {
       <Link href="/">
             <a>Back home!</a>
         </Link>
-        <h2> Card Decks  </h2>
-        <div className={styles.grid}>
-        
-          {decks.map(({ _id, name, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
-            <div className={styles.deck} key={_id} >
-              { createdBy===session.user.email || isAdmin ?
-              <a href={"/decks/deckEdit?id="+_id} >
-                {name}
-                <br />
-                {createdOn ?  'Created On: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified}
-                {lastModified ? <br /> : ''}
-              </a>
-              :
-                <div>
-                {name}
-                <br />
-                {createdOn ?  'Created On: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified}
-                {lastModified ? <br /> : ''}
-                </div>
-              }
-              {createdBy && <a href={"/decks/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
-              Created By: {createdByName}</a>}
-                {createdBy &&  <br /> }
-                <button onClick={() => removeDeckFromCard(_id)}> Remove Deck from Card</button>
-                <br /> 
-                <button onClick={() => ownDeck(_id,session.user.email, ownedBy,name, description)}> Own Deck</button>
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
-                <button onClick={() => deleteDeck(_id)}> Delete Deck</button>}
-             </div>
-            ))}
-           
-        </div>
 
-        <h2> Other Decks  </h2>
-        <div className={styles.grid}>
-        
-          {otherDecks.map(({ _id, name, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
-            <div className={styles.deck} key={_id} >
-              { createdBy===session.user.email || isAdmin ?
-              <a href={"/decks/deckEdit?id="+_id} >
-                {name}
-                <br />
-                {createdOn ?  'Created On: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified}
-                {lastModified ? <br /> : ''}
-              </a>
-              :
-                <div>
-                {name}
-                <br />
-                {createdOn ?  'Created On: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified}
-                {lastModified ? <br /> : ''}
-                </div>
-              }
-              {createdBy && <a href={"/decks/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
-              Created By: {createdByName}</a>}
-                {createdBy &&  <br /> }
-                <button onClick={() => addDeckToCard(_id)}> Add Deck to Card</button>
-                <br /> 
-                <button onClick={() => ownDeck(_id,session.user.email, ownedBy,name, description)}> Own Deck</button>
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
-                <button onClick={() => deleteDeck(_id)}> Delete Deck</button>}
-             </div>
-            ))}
-           
-        </div>
+        {cardId && cardDecks()}
+        {cardId && otherCardDecks()}
+
     </div>
     )
   }

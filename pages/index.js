@@ -145,16 +145,6 @@ export default function Home({cardList, deckList}) {
           My Decks
         </h1>
 
-        <p className={styles.description}>
-          <Link href="/decks/deckEdit">
-            <a>Create Deck</a>
-          </Link>
-          { } | { }
-          <Link href="/decks/">
-            <a>Other Decks</a>
-          </Link>
-        </p>
-
         <div className={styles.grid}>
         
           {decks.map(({ _id, name, description, createdBy, createdByName,lastModified, createdOn, ownedBy }) => (
@@ -189,16 +179,6 @@ export default function Home({cardList, deckList}) {
         <h1>
           My Cards
         </h1>
-
-        <p className={styles.description}>
-          <Link href="/cards/cardEdit">
-            <a>Create Card</a>
-          </Link>
-          { } | { }
-          <Link href="/cards/">
-            <a>Other Cards</a>
-          </Link>
-        </p>
 
         <div className={styles.grid}>
         

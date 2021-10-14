@@ -47,6 +47,15 @@ export default function Header () {
           </>}
         </p>
       </div>
+      <nav className={styles.navigation}>
+        <ul className={styles.navItems}>
+          <li className={styles.navItem}><Link href="/"><a>Home</a></Link></li>
+          <li className={styles.navItem}><Link href="/decks"><a>Others Decks</a></Link></li>
+          <li className={styles.navItem}><Link href="/cards"><a>Others Cards</a></Link></li>
+          <li className={styles.navItem}><Link href="/decks/deckEdit"><a>New Deck</a></Link></li>
+          <li className={styles.navItem}><Link href="/cards/cardEdit"><a>New Card</a></Link></li>
+        </ul>
+      </nav>
     </header>
   )
 }
