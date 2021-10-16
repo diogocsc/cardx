@@ -199,7 +199,7 @@ export default function Form({deckList,otherDeckList}) {
           category: event.target.category.value,
           cardUsers: event.target.cardUsers.value,
           source: event.target.source.value,
-          url: event.target.url.value,
+          url: event.target.uri.value,
           ownedBy: ownedBy,
           decks: decksIn,
         }),
@@ -216,7 +216,7 @@ export default function Form({deckList,otherDeckList}) {
           category: event.target.category.value,
           cardUsers: event.target.cardUsers.value,
           source: event.target.source.value,
-          url: event.target.url.value,
+          url: event.target.uri.value,
           decks: decksIn,
         }),
         headers: {
@@ -264,6 +264,7 @@ export default function Form({deckList,otherDeckList}) {
   const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
 
     return (
+      <Layout>
       <div className={styles.container}>
         <Head>
           <title>CardX - {cardId ? 'Edit' : 'New Card'}</title>
@@ -275,9 +276,9 @@ export default function Form({deckList,otherDeckList}) {
         <div className={utilStyles.input}>
           <textarea className={utilStyles.input_field} cols="30" rows="3" id="cardText" name="cardText" type="text" defaultValue={card.cardText} required />
         </div>
-        <label className={utilStyles.input_label} htmlFor="url">Card Image URL</label>
+        <label className={utilStyles.input_label} htmlFor="uri">Card Image URL</label>
         <div className={utilStyles.input}>
-          <input className={utilStyles.input_field} id="url" name="url" type="text" defaultValue={card.url} />
+          <input className={utilStyles.input_field} id="uri" name="uri" type="text" defaultValue={card.url} />
         </div>
         <label className={utilStyles.input_label} htmlFor="category">What is the card category?</label>
         <div className={utilStyles.input}>
@@ -303,6 +304,7 @@ export default function Form({deckList,otherDeckList}) {
         {cardId && otherCardDecks()}
 
     </div>
+    </Layout>
     )
   }
   

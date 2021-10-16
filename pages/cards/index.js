@@ -144,6 +144,7 @@ export default function Home({cardList}) {
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
                 <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
+                <br />
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
