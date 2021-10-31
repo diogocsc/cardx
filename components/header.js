@@ -47,6 +47,7 @@ export default function Header () {
           </>}
         </p>
       </div>
+      {session && <>
       <nav className={styles.navigation}>
         <ul className={styles.navItems}>
           <li className={styles.navItem}><Link href="/"><a>Home</a></Link></li>
@@ -56,6 +57,9 @@ export default function Header () {
           <li className={styles.navItem}><Link href="/cards/cardEdit"><a>New Card</a></Link></li>
         </ul>
       </nav>
+      </>
+
+      }
     </header>
   )
 }
