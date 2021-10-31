@@ -68,6 +68,7 @@ export default function Form() {
     if (!session) { return  <Layout><AccessDenied/></Layout> }
 
     return (
+      <Layout>
       <div className={styles.container}>
         <Head>
           <title>deckX - {deckId ? 'Edit' : 'New deck'}</title>
@@ -94,6 +95,7 @@ export default function Form() {
         </Link>
       </form>
     </div>
+    </Layout>
     )
   }
   
