@@ -56,7 +56,7 @@ export default function Home({cardList}) {
   }
   }
 
-  const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
+  const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, url) => {
     if (ownedBy) {
      ownedBy.push(email);
     }
@@ -71,6 +71,7 @@ export default function Home({cardList}) {
           cardUsers: cardUsers,
           source: source,
           ownedBy: ownedBy,
+          url: url,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -119,7 +120,7 @@ export default function Home({cardList}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName, ownedBy,category, cardUsers, source }) => (
+          {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName, ownedBy,category, cardUsers, source,url }) => (
             <div className={styles.card} key={_id} >
               { createdBy===session.user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
@@ -143,7 +144,7 @@ export default function Home({cardList}) {
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
-                <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
+                <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source, url)}> Own Card</button>
                 <br />
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}

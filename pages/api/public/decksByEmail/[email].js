@@ -18,12 +18,8 @@ export default async (req, res) => {
         ) 
         await cors(req, res); 
         const client = await clientPromise;
-        const email = req.query.email == '' ? "papoapapo2020@gmail.com" : req.query.email
-        /* retrieves all decks for papo a papo account. 
-        This may be changed in the future for parameter set emails. Probably only when authentication is available.
-        const email=Buffer.from(req.query.email, 'base64').toString();
-
-        */
+        const email = req.query.email
+        /* retrieves all decks for a given email account. */
         const colDecks = await client.db().collection('decks');
         try {
             let mySort= {name: 1};

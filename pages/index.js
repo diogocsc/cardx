@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Layout from '../components/layout'
 import { useSession, getSession } from 'next-auth/client'
 import AccessDenied from '../components/access-denied'
+import CsvReader from '../components/csvreader'
 
 "uee strict";
 
@@ -64,6 +65,9 @@ export default function Home({cardList, deckList}) {
   }
 
   
+
+
+  
   const fetchDecks = async (uri) => {
     const res = await fetch(uri)
     console.log(res);
@@ -78,7 +82,7 @@ export default function Home({cardList, deckList}) {
 
 
 
- const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source) => {
+ const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, url) => {
     const index = ownedBy.indexOf(email);
     ownedBy.splice(index,1);
 
@@ -91,6 +95,7 @@ export default function Home({cardList, deckList}) {
           cardUsers: cardUsers,
           source: source,
           ownedBy: ownedBy,
+          url: url,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -141,6 +146,12 @@ export default function Home({cardList, deckList}) {
         <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <h1>
+          Import Cards from csv
+        </h1>
+      {isAdmin ? <CsvReader /> : null}
+
       <h1>
           My Decks
         </h1>
@@ -182,7 +193,7 @@ export default function Home({cardList, deckList}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
+          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy, url }) => (
             <div className={styles.card} key={_id}>
               { createdBy===session.user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
@@ -206,11 +217,11 @@ export default function Home({cardList, deckList}) {
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
-               <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> DisOwn Card</button>
+               <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source, url)}> DisOwn Card</button>
              </div>
             ))}
         </div>
-
+        
       </Layout>
     
   )
