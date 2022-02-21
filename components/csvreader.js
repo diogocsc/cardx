@@ -54,7 +54,7 @@ export default function CsvReader(){
             console.log(csvArray.toString());
         }
 
-        reader.readAsText(file);
+        reader.readAsText(file, 'ISO-8859-1');
     }
 
     return(

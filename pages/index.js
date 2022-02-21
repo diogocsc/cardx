@@ -147,10 +147,13 @@ export default function Home({cardList, deckList}) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1>
-          Import Cards from csv
-        </h1>
-      {isAdmin ? <CsvReader /> : null}
+
+      {isAdmin ? <> 
+                <h1>
+                  Import Cards from csv
+                </h1>
+                <CsvReader />
+                </> : null}
 
       <h1>
           My Decks
