@@ -7,63 +7,62 @@ import { useSession, getSession } from 'next-auth/client'
 import AccessDenied from '../../components/access-denied'
 
 
-
 // Import the dependency.
 import clientPromise from '../../mongodb-client';
 
-async function fetchDecksFromDB(session) {
+async function fetchCategoriesFromDB(session) {
 
   const client = await clientPromise;
-  const collection = await client.db().collection('decks');
+  const collection = await client.db().collection('categories');
   let mySort= {createdOn:-1, lastModified: -1, name: 1};
-  const decks= await collection.find({ownedBy:{$ne: session.user.email}}).sort(mySort).toArray();
-  const deckList = JSON.parse(JSON.stringify(decks));
-  return deckList;
+  const categories= await collection.find({ownedBy:{$ne: session.user.email}}).sort(mySort).toArray();
+  const categoryList = JSON.parse(JSON.stringify(categories));
+  return categoryList;
 }
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-  const deckList = session ? await fetchDecksFromDB(session): '';  
+  const categoryList = session ? await fetchCategoriesFromDB(session): '';  
 
 return {
     props: {
-      deckList,
+      categoryList,
     }
   }
 }
 
-export default function Home({deckList}) {
+export default function Home({categoryList}) {
   const [ session, loading ] = useSession();
-  const [decks, setDecks] = useState(deckList);
+  const [categories, setCategories] = useState(categoryList);
 
-  const fetchDecks = async () => {
-    const res = await fetch('/api/decks')
+  const fetchCategories = async () => {
+    const res = await fetch('/api/categories')
     const data = await res.json()
     if (!data) {
       return {
         notFound: true,
       }
     }
-    setDecks(data)
+    setCategories(data)
   }
 
-  const deleteDeck = async deckId => {
-    if (confirm("This will permanently delete the deck for all users. Do you really want to delete this deck? ")) {
-    const res = await fetch('/api/decks/'+deckId, {
+  const deleteCategory = async categoryId => {
+    if (confirm("This will permanently delete the category for all users. Do you really want to delete this category? ")) {
+    const res = await fetch('/api/categories/'+categoryId, {
       method: 'DELETE'
     })
-    fetchDecks();
+    fetchCategories();
   }
   }
 
-  const ownDeck = async (deckId, email, ownedBy, name, description) => {
+  const ownCategory = async (categoryId, email, ownedBy, name, description) => {
     if (ownedBy) {
      ownedBy.push(email);
     }
     else ownedBy=[email];
 
     const res = await fetch(
-      '/api/decks/'+deckId,
+      '/api/categories/'+categoryId,
       {
         body: JSON.stringify({
           name: name,
@@ -76,7 +75,7 @@ export default function Home({deckList}) {
         method: 'PATCH'
       }
     )
-    fetchDecks();
+    fetchCategories();
   }
 
   
@@ -94,14 +93,14 @@ export default function Home({deckList}) {
     <Layout>
 
       <Head>
-        <title>CardX - Decks</title>
-        <meta name="description" content="List of Decks" />
+        <title>CardX - Categories</title>
+        <meta name="description" content="List of Categories" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
 
         <h1 className={styles.title}>
-          Others Decks
+          Categories
         </h1>
 
         <p className={styles.description}>
@@ -110,17 +109,20 @@ export default function Home({deckList}) {
             <a>Home</a>
           </Link>
           { } | { }
-          <Link href="/decks/deckEdit">
-            <a>Create Deck</a>
+          <Link href="/categories/categoryEdit">
+            <a>Create Category</a>
           </Link>
         </p>
 
         <div className={styles.grid}>
         
-          {decks.map(({ _id, name, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
+          {categories.map(({ _id, name,url, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
             <div className={styles.card} key={_id} >
               { createdBy===session.user.email || isAdmin ?
-              <a href={"/decks/deckEdit?id="+_id} >
+              <>
+              <a href={"/categories/categoryEdit?id="+_id} >
+              
+                {url && <img src={url} class={styles.category} /> }
                 {name}
                 <br />
                 {createdOn ?  'Created On: ' + createdOn : ''}
@@ -128,6 +130,7 @@ export default function Home({deckList}) {
                 {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
+              </>
               :
                 <div>
                 {name}
@@ -138,12 +141,10 @@ export default function Home({deckList}) {
                 {lastModified ? <br /> : ''}
                 </div>
               }
-              {createdBy && <a href={"/decks/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
-              Created By: {createdByName}</a>}
+              Created By: {createdByName}
                 {createdBy &&  <br /> }
-                <button onClick={() => ownDeck(_id,session.user.email, ownedBy,name, description)}> Own Deck</button>
               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
-                <button onClick={() => deleteDeck(_id)}> Delete Deck</button>}
+                <button onClick={() => deleteCategory(_id)}> Delete Category</button>}
              </div>
             ))}
            

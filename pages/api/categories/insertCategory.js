@@ -11,20 +11,18 @@ export default async (req, res) => {
   if (session) {
 
     const client = await clientPromise;
-    const collection = await client.db().collection('decks');
-    const deck = {
+    const collection = await client.db().collection('categories');
+    const category = {
       name: req.body.name,
       description: req.body.description,
       url: req.body.url,
-      categories: req.body.categories,
       createdBy: session.user.email,
       createdByName: session.user.name,
-      ownedBy: [session.user.email],
       createdOn: new Date(),
-      
+
     }
     try {
-      const c= await collection.insertOne(deck);
+      const c= await collection.insertOne(category);
       res.json(c);
 
   } catch(err){

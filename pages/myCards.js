@@ -1,54 +1,48 @@
 import Link from 'next/link'
 import Head from 'next/head'
-import styles from '../../styles/Home.module.css'
-import { useState } from 'react'
-import Layout from '../../components/layout'
+import styles from '../styles/Home.module.css'
+import { useState, useEffect } from 'react'
+import Layout from '../components/layout'
 import { useSession, getSession } from 'next-auth/client'
-import AccessDenied from '../../components/access-denied'
-import { ObjectId } from "mongodb";
+import AccessDenied from '../components/access-denied'
+import CsvReader from '../components/csvreader'
 
 
-"uee strict";
+
+"use strict";
 
 // Import the dependency.
-import clientPromise from '../../mongodb-client';
+import clientPromise from '../mongodb-client';
 
-async function fetchCardsFromDB(context) {
+async function fetchCardsFromDB(context, session) {
+  const email=session.user.email;
   const client = await clientPromise;
   const collection = await client.db().collection('cards');
   let mySort= {createdOn:-1, lastModified: -1, cardText: 1};
-  const cards= await collection.find({decks:context.query.id}).sort(mySort).toArray();
+  const cards= await collection.find({ownedBy:email}).sort(mySort).toArray();
   const cardList = JSON.parse(JSON.stringify(cards));
   return cardList;
 }
 
-async function fetchDeckFromDB(context) {
-  const client = await clientPromise;
-  const collection = await client.db().collection('decks');
-  console.log("1 "+context.query.id);
-  const deck= await collection.find({_id:ObjectId(context.query.id)}).toArray();
-  console.log("2 "+deck);
-  const deckList = JSON.parse(JSON.stringify(deck));
-  return deckList;
-}
-
 export async function getServerSideProps(context) {
 const session = await getSession(context);
-const cardList = session ? await fetchCardsFromDB(context): '';
-const deckList = await fetchDeckFromDB(context);
+const cardList = session ? await fetchCardsFromDB(context, session): '';
+
+
 
 return {
     props: {
       cardList,
-      deckList
     }
   }
 }
 
-export default function Home({cardList, deckList}) {
+
+export default function Home({cardList, deckList,categoryList}) {
   const [ session, loading ] = useSession();
+  
   const [cards, setCards] = useState(cardList);
-  const deck= deckList.length >= 1 ? deckList[0] : [];
+ 
 
   const fetchCards = async (uri) => {
     const res = await fetch(uri)
@@ -62,15 +56,33 @@ export default function Home({cardList, deckList}) {
     setCards(data)
   }
 
+  
 
-  const deleteCard = async cardId => {
-    const res = await fetch('/api/cards/'+cardId, {
-      method: 'DELETE'
-    })
+ const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, url) => {
+    const index = ownedBy.indexOf(email);
+    ownedBy.splice(index,1);
 
-    fetchCards('/api/cards/');
+    const res = await fetch(
+      '/api/cards/'+cardId,
+      {
+        body: JSON.stringify({
+          cardText: cardText,
+          category: category,
+          cardUsers: cardUsers,
+          source: source,
+          ownedBy: ownedBy,
+          url: url,
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PATCH'
+      }
+    )
+
+    fetchCards('/api/cards/my');
   }
-    
+ 
   // When rendering client side don't display anything until loading is complete
   if (typeof window !== 'undefined' && loading) return null
 
@@ -84,59 +96,58 @@ export default function Home({cardList, deckList}) {
     <Layout>
 
       <Head>
-        <title>CardX - {deck.name} </title>
-        <meta name="description" content="Cards per Deck" />
+        <title>CardX</title>
+        <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
 
-        <h1>
-          Cards for {deck.name}
-        </h1>
+      {isAdmin ? <> 
+                <h1>
+                  Import Cards from csv
+                </h1>
+                <CsvReader />
+                </> : null}
 
-        <p className={styles.description}>
-          <Link href={"/decks/deckEdit?id="+deck._id}>
-            <a>Edit Deck</a>
-          </Link> { } | { }
-          <Link href={"/cards/cardEdit?deckId="+deck._id}>
-            <a>Create Card for Deck</a>
-          </Link>
-          { } | { }
-          <Link href="/">
-            <a>Home</a>
-          </Link>
-        </p>
+       
+         
+
+    
+        <h1>
+          My Cards
+        </h1>
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
+          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy, url }) => (
             <div className={styles.card} key={_id}>
               { createdBy===session.user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />
-                {createdOn ?  'Created on: ' + createdOn : ''}
+                {createdOn ?  'Created On: ' + createdOn : ''}
                 {createdOn ? <br /> : ''}
-                {lastModified && 'Last Modified on: '+ lastModified}
+                {lastModified}
                 {lastModified ? <br /> : ''}
               </a>
               :
                 <div>
                 {cardText}
                 <br />
-                {createdOn ?  'Created on: ' + createdOn : ''}
+                {createdOn ?  'Created On: ' + createdOn : ''}
                 {createdOn ? <br /> : ''}
-                {lastModified && 'Last Modified on: '+ lastModified}
+                {lastModified}
                 {lastModified ? <br /> : ''}
                 </div>
               }
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
+               <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source, url)}> DisOwn Card</button>
              </div>
             ))}
         </div>
-
+        
       </Layout>
     
   )

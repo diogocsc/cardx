@@ -95,7 +95,7 @@ export default function Home({cardList, deckList}) {
         </h1>
 
         <p className={styles.description}>
-          <Link href={"/decks/deckEdit?id="+deck._id}>
+          <Link href={"/cards/deckEdit?id="+deck._id}>
             <a>Edit Deck</a>
           </Link> { } | { }
           <Link href={"/cards/cardEdit?deckId="+deck._id}>

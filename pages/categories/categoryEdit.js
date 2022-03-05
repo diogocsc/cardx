@@ -14,18 +14,16 @@ export default function Form() {
     const [ session, loading ] = useSession();
 
     const router = useRouter()
-    const deckId = router.query.id
-    async function submitDeck(event, ownedBy) {
+    const categoryId = router.query.id
+    async function submitCategory(event) {
     event.preventDefault()
-    const res = deckId ? await fetch(
-      '/api/decks/' + deckId,
+    const res = categoryId ? await fetch(
+      '/api/categories/' + categoryId,
       {
         body: JSON.stringify({
           name: event.target.name.value,
           description: event.target.description.value,
           url: event.target.url.value,
-          categories: event.target.categories.value.split(','),
-          ownedBy: ownedBy,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -33,13 +31,12 @@ export default function Form() {
         method: 'PATCH'
       }
     ) : await fetch(
-      '/api/decks/insertDeck',
+      '/api/categories/insertCategory',
       {
         body: JSON.stringify({
           name: event.target.name.value,
           description: event.target.description.value,
           url: event.target.url.value,
-          categories: event.target.categories.value.split(','),
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -47,21 +44,21 @@ export default function Form() {
         method: 'POST'
       }
     )
-    alert("Deck Submitted")
+    alert("Category Submitted")
 
   } 
 
-    const [deck, setDeck] = useState('');
+    const [category, setCategory] = useState('');
 
-    const fetchDeck = async () => {
-      const res = await fetch('/api/decks/'+deckId)
-      const deck = await res.json()
-      setDeck(deck);
+    const fetchCategory = async () => {
+      const res = await fetch('/api/categories/'+categoryId)
+      const category = await res.json()
+      setCategory(category);
     }
 
     useEffect( () => {
-      deckId ? fetchDeck() : ''
-    }, [deckId])
+      categoryId ? fetchCategory() : ''
+    }, [categoryId])
 
     // When rendering client side don't display anything until loading is complete
     if (typeof window !== 'undefined' && loading) return null
@@ -73,26 +70,22 @@ export default function Form() {
       <Layout>
       <div className={styles.container}>
         <Head>
-          <title>deckX - {deckId ? 'Edit' : 'New deck'}</title>
-          <meta name="description" content="The place to edit or create decks" />
+          <title>categoryX - {categoryId ? 'Edit' : 'New category'}</title>
+          <meta name="description" content="The place to edit or create categories" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <form onSubmit={(event) => submitDeck(event, deck.ownedBy)}>
-        <label className={utilStyles.input_label} htmlFor="name">Deck name</label>
+        <form onSubmit={(event) => submitCategory(event, category.ownedBy)}>
+        <label className={utilStyles.input_label} htmlFor="name">Category name</label>
         <div className={utilStyles.input}>
-          <input className={utilStyles.input_field} id="name" name="name" type="text" defaultValue={deck.name} required />
+          <input className={utilStyles.input_field} id="name" name="name" type="text" defaultValue={category.name} required />
         </div>
-        <label className={utilStyles.input_label} htmlFor="description">What is this deck all about?</label>
+        <label className={utilStyles.input_label} htmlFor="description">What is this category all about?</label>
         <div className={utilStyles.input}>
-          <textarea className={utilStyles.input_field} cols="30" rows="3" id="description" name="description" type="text" defaultValue={deck.description} />
+          <textarea className={utilStyles.input_field} cols="30" rows="3" id="description" name="description" type="text" defaultValue={category.description} />
         </div>
-        <label className={utilStyles.input_label} htmlFor="url">deck Image URL</label>
+        <label className={utilStyles.input_label} htmlFor="url">category Image URL</label>
         <div className={utilStyles.input}>
-          <input className={utilStyles.input_field} id="url" name="url" type="text" defaultValue={deck.url} />
-        </div>
-        <label className={utilStyles.input_label} htmlFor="categories">Categories</label>
-        <div className={utilStyles.input}>
-          <input className={utilStyles.input_field} id="categories" name="categories" type="text" defaultValue={deck.categories && deck.categories.join()} />
+          <input className={utilStyles.input_field} id="url" name="url" type="text" defaultValue={category.url} />
         </div>
         <button className={utilStyles.card_button} type="submit">Submit</button>
         <br />

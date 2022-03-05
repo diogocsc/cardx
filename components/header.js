@@ -7,13 +7,31 @@ import styles from './header.module.css'
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header () {
   const [ session, loading ] = useSession()
+  // If session exists, display content
   
+  const isAdmin = session ? session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
   return (
     <header>
       <noscript>
         <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
       </noscript>
       <div className={styles.signedInStatus}>
+      {session && <>
+      <nav className={styles.navigation}>
+        <ul className={styles.navItems}>
+          <li className={styles.navItem}><Link href="/"><a>Home</a></Link></li>
+          <li className={styles.navItem}><Link href="/myDecks"><a>My Decks</a></Link></li>
+          <li className={styles.navItem}><Link href="/myCards"><a>My Cards</a></Link></li>
+          <li className={styles.navItem}><Link href="/decks/deckEdit"><a>New Deck</a></Link></li>
+          <li className={styles.navItem}><Link href="/cards/cardEdit"><a>New Card</a></Link></li>
+          {isAdmin && <li className={styles.navItem}><Link href="/categories"><a>Categories</a></Link></li>}
+
+        </ul>
+      </nav>
+      </>
+
+      }
+
         <p className={`nojs-show ${(!session && loading) ? styles.loading : styles.loaded}`}>
           {!session && <>
             <span className={styles.notSignedInText}>You are not signed in</span>
@@ -27,8 +45,10 @@ export default function Header () {
               >
                 Sign in
               </a>
-          </>}
+          </>}        
+
           {session && <>
+
             {session.user.image && <span style={{backgroundImage: `url(${session.user.image})` }} className={styles.avatar}/>}
             <span className={styles.signedInText}>
               <small>Signed in as</small><br/>
@@ -36,7 +56,7 @@ export default function Header () {
               </span>
             <a
                 href={`/api/auth/signout`}
-                className={styles.button}
+                className={styles.button }
                 onClick={(e) => {
                   e.preventDefault()
                   signOut()
@@ -44,22 +64,9 @@ export default function Header () {
               >
                 Sign out
               </a>
-          </>}
-        </p>
+          </>}</p>
       </div>
-      {session && <>
-      <nav className={styles.navigation}>
-        <ul className={styles.navItems}>
-          <li className={styles.navItem}><Link href="/"><a>Home</a></Link></li>
-          <li className={styles.navItem}><Link href="/decks"><a>Others Decks</a></Link></li>
-          <li className={styles.navItem}><Link href="/cards"><a>Others Cards</a></Link></li>
-          <li className={styles.navItem}><Link href="/decks/deckEdit"><a>New Deck</a></Link></li>
-          <li className={styles.navItem}><Link href="/cards/cardEdit"><a>New Card</a></Link></li>
-        </ul>
-      </nav>
-      </>
-
-      }
+      
     </header>
   )
 }

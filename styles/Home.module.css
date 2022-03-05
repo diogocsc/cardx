@@ -2,12 +2,25 @@
   min-height: 100vh;
   padding: 0 0.5rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   /*height: 100vh;*/
 }
 
+.category{
+
+  margin-right: 15px;
+  width: 50px;
+
+}
+
+.deck{
+
+  margin-right: 15px;
+  width: 100%;
+
+}
 .main {
   padding: 5rem 0;
   flex: 1;
@@ -77,6 +90,13 @@
   max-width: 800px;
   margin-top: 3rem;
 }
+.categoryLine {
+  display: flex;
+ /* align-items: center;
+  justify-content: center; */
+  flex-wrap: wrap;
+  margin-top: 3rem;
+}
 
 .card {
   margin: 1rem;
@@ -87,7 +107,6 @@
   border: 1px solid #eaeaea;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
-  width: 45%;
   position: relative;
   z-index: 2;
 }
