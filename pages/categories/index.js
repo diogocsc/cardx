@@ -122,7 +122,7 @@ export default function Home({categoryList}) {
               <>
               <a href={"/categories/categoryEdit?id="+_id} >
               
-                {url && <img src={url} class={styles.category} /> }
+                {url && <img src={url} className={styles.category} /> }
                 {name}
                 <br />
                 {createdOn ?  'Created On: ' + createdOn : ''}
