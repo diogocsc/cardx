@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Head from 'next/head'
-import styles from '../../styles/Home.module.css'
+import styles from '../../styles/Decks.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
 import { useSession, getSession } from 'next-auth/client'
@@ -130,30 +130,25 @@ export default function Home({cardList, cardDownloadList, deckList}) {
 
         <div className={styles.grid}>
         
-          {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
+          {cards.map(({ _id, cardText, createdBy, url }) => (
             <div className={styles.card} key={_id}>
               { createdBy===session.user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
-                {cardText}
-                <br />
-                {createdOn ?  'Created on: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified && 'Last Modified on: '+ lastModified}
-                {lastModified ? <br /> : ''}
+                {url ? 
+                  <img src={url} className={styles.deck} /> 
+                  :
+                  cardText}                
               </a>
               :
                 <div>
-                {cardText}
-                <br />
-                {createdOn ?  'Created on: ' + createdOn : ''}
-                {createdOn ? <br /> : ''}
-                {lastModified && 'Last Modified on: '+ lastModified}
-                {lastModified ? <br /> : ''}
+               {url ? 
+                  <img src={url} className={styles.deck} /> 
+                  :
+                  cardText} 
+                
                 </div>
               }
-              {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
-              Created By: {createdByName}</a>}
-                {createdBy &&  <br /> }
+              
              </div>
             ))}
         </div>

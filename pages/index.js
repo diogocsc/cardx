@@ -85,11 +85,13 @@ export default function Home({cardList, deckList,categoryList}) {
         <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      <h1>
+        Choose a Deck
+      </h1>
       <div>   
         {categories.map(({_id, name, url }) => (
           <>
-          <div className={styles.categoryLine} key={name} >      
+          <div className={styles.categoryHeader} key={name} >      
               {url && <img src={url} className={styles.category} /> }
               {name}
            </div>
