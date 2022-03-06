@@ -7,8 +7,9 @@ export default function AccessDenied () {
     <>
       <h1>Access Denied</h1>
       <p>
-    <a href="/api/auth/login">Login</a>
-
+      <Link href="/api/auth/login">
+        <a>Login</a>
+      </Link>
       </p>
     </>
   )
