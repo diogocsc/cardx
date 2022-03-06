@@ -5,13 +5,13 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import utilStyles from '../../styles/utils.module.css'
 import styles from '../../styles/Home.module.css'
-import { useSession } from 'next-auth/client'
+import { useUser } from '@auth0/nextjs-auth0';
 import Layout from '../../components/layout'
 import AccessDenied from '../../components/access-denied'
 
 export default function Form() {
 
-    const [ session, loading ] = useSession();
+  const { user, error, isLoading } = useUser();
 
     const router = useRouter()
     const deckId = router.query.id
@@ -63,11 +63,11 @@ export default function Form() {
       deckId ? fetchDeck() : ''
     }, [deckId])
 
-    // When rendering client side don't display anything until loading is complete
-    if (typeof window !== 'undefined' && loading) return null
 
-    // If no session exists, display access denied message
-    if (!session) { return  <Layout><AccessDenied/></Layout> }
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>{error.message}</div>;
+    // If no user exists, display access denied message
+    if (!user) { return  <Layout><AccessDenied/></Layout> }
 
     return (
       <Layout>

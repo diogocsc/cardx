@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { useState, useEffect } from 'react'
 import Layout from '../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import AccessDenied from '../components/access-denied'
 import CsvReader from '../components/csvreader'
 import React from "react";
@@ -27,20 +27,21 @@ async function fetchDecksFromDB(session) {
   return deckList;
 }
 
-export async function getServerSideProps(context) {
-const session = await getSession(context);
-const deckList = session ? await fetchDecksFromDB(session): '';
-
-return {
-    props: {
-      deckList,
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    const session = getSession(context.req, context.res);
+    const deckList = session ? await fetchDecksFromDB(session): '';
+    return {
+        props: {
+          deckList,
+        }
+      };
     }
-  }
-}
+})
 
 
-export default function Home({cardList, deckList,categoryList}) {
-  const [ session, loading ] = useSession();
+export default function Home({user, deckList,categoryList}) {
+  const { error, isLoading } = useUser();
   const [categories, setCategories] = useState(categoryList);
 
   const [decks, setDecks] = useState(deckList);
@@ -80,15 +81,20 @@ export default function Home({cardList, deckList,categoryList}) {
     fetchDecks('/api/decks/my');
   }
 
+  const deleteDeck = async deckId => {
+    if (confirm("This will permanently delete the deck for all users. Do you really want to delete this deck? ")) {
+    const res = await fetch('/api/decks/'+deckId, {
+      method: 'DELETE'
+    })
+    fetchDecks();
+  }
+  }
   
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
     <Layout>
@@ -107,7 +113,7 @@ export default function Home({cardList, deckList,categoryList}) {
         
           {decks.map(({ _id, name, description, createdBy, createdByName,lastModified, createdOn, ownedBy }) => (
             <div className={styles.card} key={_id}>
-              { createdBy===session.user.email || isAdmin ?
+              { createdBy===user.email || isAdmin ?
               <a href={"/decks/"+_id} >
                 {name}
                 <br />
@@ -129,7 +135,9 @@ export default function Home({cardList, deckList,categoryList}) {
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
-               <button onClick={() => removeDeck(_id,session.user.email, ownedBy,name,description)}> DisOwn Deck</button>
+               <button onClick={() => removeDeck(_id,user.email, ownedBy,name,description)}> DisOwn Deck</button>
+               { isAdmin && 
+                <button onClick={() => deleteDeck(_id)}> Delete Deck</button>}
              </div>
             ))}
         </div>

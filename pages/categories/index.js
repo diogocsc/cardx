@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import AccessDenied from '../../components/access-denied'
 
 
@@ -20,19 +20,21 @@ async function fetchCategoriesFromDB(session) {
   return categoryList;
 }
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  const categoryList = session ? await fetchCategoriesFromDB(session): '';  
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    const session = getSession(context.req, context.res);
+    const categoryList = session ? await fetchCategoriesFromDB(session): '';  
 
-return {
-    props: {
-      categoryList,
+    return {
+        props: {
+          categoryList,
+        }
+      };
     }
-  }
-}
+})
 
-export default function Home({categoryList}) {
-  const [ session, loading ] = useSession();
+export default function Home({user,categoryList}) {
+  const { error, isLoading } = useUser();
   const [categories, setCategories] = useState(categoryList);
 
   const fetchCategories = async () => {
@@ -54,40 +56,13 @@ export default function Home({categoryList}) {
     fetchCategories();
   }
   }
-
-  const ownCategory = async (categoryId, email, ownedBy, name, description) => {
-    if (ownedBy) {
-     ownedBy.push(email);
-    }
-    else ownedBy=[email];
-
-    const res = await fetch(
-      '/api/categories/'+categoryId,
-      {
-        body: JSON.stringify({
-          name: name,
-          description: description,
-          ownedBy: ownedBy,
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        method: 'PATCH'
-      }
-    )
-    fetchCategories();
-  }
-
   
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
 
   return (
     <Layout>
@@ -116,9 +91,9 @@ export default function Home({categoryList}) {
 
         <div className={styles.grid}>
         
-          {categories.map(({ _id, name,url, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
+          {categories.map(({ _id, name,url, createdOn, lastModified, createdBy, createdByName }) => (
             <div className={styles.card} key={_id} >
-              { createdBy===session.user.email || isAdmin ?
+              { createdBy===user.email || isAdmin ?
               <>
               <a href={"/categories/categoryEdit?id="+_id} >
               
@@ -143,7 +118,7 @@ export default function Home({categoryList}) {
               }
               Created By: {createdByName}
                 {createdBy &&  <br /> }
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
+              { isAdmin && 
                 <button onClick={() => deleteCategory(_id)}> Delete Category</button>}
              </div>
             ))}

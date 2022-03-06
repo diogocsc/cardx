@@ -5,11 +5,9 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import utilStyles from '../../styles/utils.module.css'
 import styles from '../../styles/Home.module.css'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import Layout from '../../components/layout'
 import AccessDenied from '../../components/access-denied'
-
-
 
 // Import the dependency.
 import clientPromise from '../../mongodb-client';
@@ -48,22 +46,22 @@ async function fetchOtherDecksFromDB(context) {
 
 
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  const deckList = session ? await fetchDecksFromDB(context): '';  
-  const otherDeckList = session ? await fetchOtherDecksFromDB(context): '';  
-
-return {
-    props: {
-      deckList,
-      otherDeckList,
-    }
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    // access the user session
+    const session = getSession(context.req, context.res);
+    const deckList = session ? await fetchDecksFromDB(context): '';  
+    const otherDeckList = session ? await fetchOtherDecksFromDB(context): '';  
+    return { props: {  
+              deckList,
+               otherDeckList, 
+            } 
+          };
   }
-}
+});
 
-export default function Form({deckList,otherDeckList}) {
-
-  const [ session, loading ] = useSession();
+export default function Form({user,deckList,otherDeckList}) {
+  const { error, isLoading } = useUser();
 
     const router = useRouter()
     const cardId = router.query.id
@@ -89,7 +87,7 @@ export default function Form({deckList,otherDeckList}) {
 
        {decks.map(({ _id, name, description, createdBy, createdByName }) => (
          <div className={styles.deck} key={_id}>
-           {createdBy === session.user.email || isAdmin ?
+           {createdBy === user.email || isAdmin ?
              <a href={"/decks/deckEdit?id=" + _id}>
                {name} <br />
                {description}
@@ -118,7 +116,7 @@ export default function Form({deckList,otherDeckList}) {
       
         {otherDecks.map(({ _id, name, createdBy, createdByName,description }) => (
           <div className={styles.deck} key={_id} >
-            { createdBy===session.user.email || isAdmin ?
+            { createdBy===user.email || isAdmin ?
             <a href={"/decks/deckEdit?id="+_id} >
               {name}<br /> 
               {description}
@@ -253,15 +251,12 @@ export default function Form({deckList,otherDeckList}) {
             <option value="D">Divertida</option>
         </select>
 */
-      // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+  
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
     return (
       <Layout>

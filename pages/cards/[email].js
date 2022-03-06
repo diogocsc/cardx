@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
-import { useSession } from 'next-auth/client'
+import { useUser } from '@auth0/nextjs-auth0';
 import AccessDenied from '../../components/access-denied'
 
 "uee strict";
@@ -36,12 +36,11 @@ return {
 }
 
 export default function Home({cardList, email,name}) {
-  const [ session, loading ] = useSession();
+  const { user, error, isLoading } = useUser();
   const [cards, setCards] = useState(cardList);
 
   const fetchCards = async (uri) => {
     const res = await fetch(uri)
-    console.log(res);
     const data = await res.json()
     if (!data) {
       return {
@@ -84,15 +83,13 @@ export default function Home({cardList, email,name}) {
     alert("Card Owned")
   }
   
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
+ 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error.message}</div>;
 
   // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+  if (!user) { return  <Layout><AccessDenied/></Layout> }
+  const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
     <Layout>
@@ -122,7 +119,7 @@ export default function Home({cardList, email,name}) {
         
           {cards.map(({ _id, cardText, createdOn, lastModified, createdBy, createdByName,ownedBy, category, cardUsers, source }) => (
             <div className={styles.card} key={_id}>
-             { createdBy===session.user.email || isAdmin ?
+             { createdBy===user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />
@@ -145,9 +142,9 @@ export default function Home({cardList, email,name}) {
                 {lastModified ? <br /> : ''}
                 </div>
               }
-               <button onClick={() => ownCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
+               <button onClick={() => ownCard(_id,user.email, ownedBy,cardText, category, cardUsers, source)}> Own Card</button>
 
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
+              { isAdmin && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
             ))}

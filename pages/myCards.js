@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { useState, useEffect } from 'react'
 import Layout from '../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import AccessDenied from '../components/access-denied'
 import CsvReader from '../components/csvreader'
 
@@ -24,27 +24,23 @@ async function fetchCardsFromDB(context, session) {
   return cardList;
 }
 
-export async function getServerSideProps(context) {
-const session = await getSession(context);
-const cardList = session ? await fetchCardsFromDB(context, session): '';
-
-
-
-return {
-    props: {
-      cardList,
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    const session = getSession(context.req, context.res);
+    const cardList = session ? await fetchCardsFromDB(context, session): '';
+    return {
+        props: {
+          cardList,
+        }
+      };
     }
-  }
-}
+})
 
 
-export default function Home({cardList, deckList,categoryList}) {
-  const [ session, loading ] = useSession();
-  
+export default function Home({user, cardList}) {
+  const { error, isLoading } = useUser();
   const [cards, setCards] = useState(cardList);
- 
-
-  const fetchCards = async (uri) => {
+   const fetchCards = async (uri) => {
     const res = await fetch(uri)
     const data = await res.json()
     if (!data) {
@@ -89,14 +85,11 @@ export default function Home({cardList, deckList,categoryList}) {
     fetchCards('/api/cards/my');
   }
  
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
     <Layout>
@@ -107,17 +100,12 @@ export default function Home({cardList, deckList,categoryList}) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-
       {isAdmin ? <> 
                 <h1>
                   Import Cards from csv
                 </h1>
                 <CsvReader />
                 </> : null}
-
-       
-         
-
     
         <h1>
           My Cards
@@ -127,7 +115,7 @@ export default function Home({cardList, deckList,categoryList}) {
         
           {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy, url }) => (
             <div className={styles.card} key={_id}>
-              { createdBy===session.user.email || isAdmin ?
+              { createdBy===user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />
@@ -149,8 +137,8 @@ export default function Home({cardList, deckList,categoryList}) {
               {createdBy && <a href={"/cards/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
-               <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source, url)}> DisOwn Card</button>
-               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
+               <button onClick={() => removeCard(_id,user.email, ownedBy,cardText, category, cardUsers, source, url)}> DisOwn Card</button>
+               { isAdmin && 
                 <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
             ))}

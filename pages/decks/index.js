@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import AccessDenied from '../../components/access-denied'
 
 
@@ -21,19 +21,20 @@ async function fetchDecksFromDB(session) {
   return deckList;
 }
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  const deckList = session ? await fetchDecksFromDB(session): '';  
-
-return {
-    props: {
-      deckList,
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    const session = getSession(context.req, context.res);
+    const deckList = session ? await fetchDecksFromDB(session): '';  
+    return {
+        props: {
+          deckList,
+        }
+      };
     }
-  }
-}
+})
 
-export default function Home({deckList}) {
-  const [ session, loading ] = useSession();
+export default function Home({user, deckList}) {
+  const { error, isLoading } = useUser();
   const [decks, setDecks] = useState(deckList);
 
   const fetchDecks = async () => {
@@ -80,15 +81,11 @@ export default function Home({deckList}) {
   }
 
   
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
     <Layout>
@@ -119,7 +116,7 @@ export default function Home({deckList}) {
         
           {decks.map(({ _id, name, createdOn, lastModified, createdBy, createdByName, ownedBy,description }) => (
             <div className={styles.card} key={_id} >
-              { createdBy===session.user.email || isAdmin ?
+              { createdBy===user.email || isAdmin ?
               <a href={"/decks/deckEdit?id="+_id} >
                 {name}
                 <br />
@@ -141,8 +138,8 @@ export default function Home({deckList}) {
               {createdBy && <a href={"/decks/"+btoa(unescape(encodeURIComponent(createdBy)))+"?name="+createdByName}>
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
-                <button onClick={() => ownDeck(_id,session.user.email, ownedBy,name, description)}> Own Deck</button>
-              { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
+                <button onClick={() => ownDeck(_id,user.email, ownedBy,name, description)}> Own Deck</button>
+              { isAdmin && 
                 <button onClick={() => deleteDeck(_id)}> Delete Deck</button>}
              </div>
             ))}

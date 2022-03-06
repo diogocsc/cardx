@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser, withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import AccessDenied from '../../components/access-denied'
 import { ObjectId } from "mongodb";
 
@@ -32,21 +32,22 @@ async function fetchDeckFromDB(context) {
   return deckList;
 }
 
-export async function getServerSideProps(context) {
-const session = await getSession(context);
-const cardList = session ? await fetchCardsFromDB(context): '';
-const deckList = await fetchDeckFromDB(context);
-
-return {
-    props: {
-      cardList,
-      deckList
-    }
+export const getServerSideProps=withPageAuthRequired({
+  async getServerSideProps(context) {
+    const session = getSession(context.req, context.res);
+    const cardList = session ? await fetchCardsFromDB(context): '';
+    const deckList = await fetchDeckFromDB(context);
+    return {
+        props: {
+          cardList,
+          deckList
+        }
+      };
   }
-}
+})
 
-export default function Home({cardList, deckList}) {
-  const [ session, loading ] = useSession();
+export default function Home({user, cardList, deckList}) {
+  const { error, isLoading } = useUser();
   const [cards, setCards] = useState(cardList);
   const deck= deckList.length >= 1 ? deckList[0] : [];
 
@@ -71,14 +72,11 @@ export default function Home({cardList, deckList}) {
     fetchCards('/api/cards/');
   }
     
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>{error.message}</div>;
+// If no user exists, display access denied message
+if (!user) { return  <Layout><AccessDenied/></Layout> }
+const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
     <Layout>
@@ -111,7 +109,7 @@ export default function Home({cardList, deckList}) {
         
           {cards.map(({ _id, cardText, createdBy, createdByName,lastModified, createdOn, category, cardUsers, source, ownedBy }) => (
             <div className={styles.card} key={_id}>
-              { createdBy===session.user.email || isAdmin ?
+              { createdBy===user.email || isAdmin ?
               <a href={"/cards/cardEdit?id="+_id} >
                 {cardText}
                 <br />

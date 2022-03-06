@@ -3,25 +3,18 @@ import Head from 'next/head'
 import styles from '../styles/Game.module.css'
 import { useState } from 'react'
 import Layout from '../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser } from '@auth0/nextjs-auth0';
 import AccessDenied from '../components/access-denied'
 import { useRouter } from 'next/router';
 
 export default function Home() {
-    const [ session, loading ] = useSession();
+  const { user, error, isLoading } = useUser();
     const { query } = useRouter();
 
-
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
-
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
-
-
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>{error.message}</div>;
+    // If no user exists, display access denied message
+    if (!user) { return  <Layout><AccessDenied/></Layout> }
     
 var playCards;
 var usedDeck = [];

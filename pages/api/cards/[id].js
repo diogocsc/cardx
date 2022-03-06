@@ -2,12 +2,12 @@
 
 import clientPromise from '../../../mongodb-client';
 import { ObjectId } from "mongodb";
-import { getSession } from 'next-auth/client'
+import { withApiAuthRequired, getSession } from '@auth0/nextjs-auth0';
 
 
-export default async (req, res) => {
-    const session = await getSession({ req })
-    if (session) {
+export default withApiAuthRequired(async (req, res) => {
+    const { user } = getSession(req, res);
+    if (user) {
 
         const client = await clientPromise;
         const collection = await client.db().collection('cards');
@@ -32,4 +32,4 @@ export default async (req, res) => {
     }
     else res.send('No permission');
 
-};
+})

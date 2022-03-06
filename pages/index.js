@@ -2,7 +2,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../components/layout'
-import { useSession, getSession } from 'next-auth/client'
+import { useUser } from '@auth0/nextjs-auth0';
 import AccessDenied from '../components/access-denied'
 import React from "react";
 import useSWR from 'swr'
@@ -17,7 +17,7 @@ import clientPromise from '../mongodb-client';
 
 const CategoryDecks = dynamic(() => import('../components/categoryDecks'))
 */
-async function fetchCategoriesFromDB(context, session) {
+async function fetchCategoriesFromDB() {
   const client = await clientPromise;
   const collection = await client.db().collection('categories');
   let mySort= {name: 1};
@@ -27,9 +27,8 @@ async function fetchCategoriesFromDB(context, session) {
 }
 
 
-export async function getServerSideProps(context) {
-const session = await getSession(context);
-const categoryList = session ? await fetchCategoriesFromDB(session): '';
+export async function getServerSideProps() {
+const categoryList = await fetchCategoriesFromDB();
 
 return {
     props: {
@@ -64,18 +63,15 @@ function CategoryDecks({categoryName}) {
 }
 
 
-export default function Home({cardList, deckList,categoryList}) {
-  const [ session, loading ] = useSession();
+export default function Home({categoryList}) {
+  
+  const { user, error, isLoading } = useUser();
   const [categories, setCategories] = useState(categoryList);
 
-  // When rendering client side don't display anything until loading is complete
-  if (typeof window !== 'undefined' && loading) return null
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error.message}</div>;
+  if (!user) { return  <Layout><AccessDenied/></Layout> }
 
-  // If no session exists, display access denied message
-  if (!session) { return  <Layout><AccessDenied/></Layout> }
-
-  // If session exists, display content
-  const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
 
   return (
     <Layout>
