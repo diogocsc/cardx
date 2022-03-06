@@ -46,7 +46,6 @@ export default function Home({cardList, deckList,categoryList}) {
 
   const fetchCards = async (uri) => {
     const res = await fetch(uri)
-    console.log(res);
     const data = await res.json()
     if (!data) {
       return {
@@ -56,7 +55,14 @@ export default function Home({cardList, deckList,categoryList}) {
     setCards(data)
   }
 
-  
+  const deleteCard = async cardId => {
+    if (confirm("This will permanently delete the card for all users. Do you really want to delete this card? ")) {
+    const res = await fetch('/api/cards/'+cardId, {
+      method: 'DELETE'
+    })
+    fetchCards('/api/cards/my');
+    }
+  }
 
  const removeCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, url) => {
     const index = ownedBy.indexOf(email);
@@ -144,6 +150,8 @@ export default function Home({cardList, deckList,categoryList}) {
               Created By: {createdByName}</a>}
                 {createdBy &&  <br /> }
                <button onClick={() => removeCard(_id,session.user.email, ownedBy,cardText, category, cardUsers, source, url)}> DisOwn Card</button>
+               { session.user.email===process.env.NEXT_PUBLIC_EMAIL_ADMIN && 
+                <button onClick={() => deleteCard(_id)}> Delete Card</button>}
              </div>
             ))}
         </div>

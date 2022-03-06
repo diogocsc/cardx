@@ -6,7 +6,7 @@ import Layout from '../../components/layout'
 import { useSession, getSession } from 'next-auth/client'
 import AccessDenied from '../../components/access-denied'
 import { ObjectId } from "mongodb";
-
+import { CSVLink } from "react-csv";
 
 "uee strict";
 
@@ -20,6 +20,15 @@ async function fetchCardsFromDB(context) {
   const cards= await collection.find({decks:context.query.id}).sort(mySort).toArray();
   const cardList = JSON.parse(JSON.stringify(cards));
   return cardList;
+}
+
+async function fetchCardsToDownloadFromDB(context) {
+  const client = await clientPromise;
+  const collection = await client.db().collection('cards');
+  let mySort= {cardText: 1};
+  const cards= await collection.find({decks:context.query.id},{projection: {cardText: 1, url:1, category:1, source:1,cardUsers:1, decks:1, _id:0}}).sort(mySort).toArray();
+  const cardDownloadList = JSON.parse(JSON.stringify(cards));
+  return cardDownloadList;
 }
 
 async function fetchDeckFromDB(context) {
@@ -36,18 +45,23 @@ export async function getServerSideProps(context) {
 const session = await getSession(context);
 const cardList = session ? await fetchCardsFromDB(context): '';
 const deckList = await fetchDeckFromDB(context);
+const cardDownloadList = session ? await fetchCardsToDownloadFromDB(context): '';
 
 return {
     props: {
       cardList,
+      cardDownloadList,
       deckList
     }
   }
 }
 
-export default function Home({cardList, deckList}) {
+
+export default function Home({cardList, cardDownloadList, deckList}) {
   const [ session, loading ] = useSession();
   const [cards, setCards] = useState(cardList);
+  const [cardsToDownload] = useState(cardDownloadList);
+
   const deck= deckList.length >= 1 ? deckList[0] : [];
 
   const fetchCards = async (uri) => {
@@ -93,6 +107,10 @@ export default function Home({cardList, deckList}) {
         <h1>
           Cards for {deck.name}
         </h1>
+
+        <CSVLink data={cardsToDownload} separator={";"} filename={deck.name+".csv"}>
+           Download me
+        </CSVLink>
 
         <p className={styles.description}>
           <Link href={"/decks/deckEdit?id="+deck._id}>

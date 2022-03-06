@@ -5,7 +5,8 @@ export default function CsvReader(){
     const [csvArray, setCsvArray] = useState([]);
     // [{name: "", age: 0, rank: ""},{name: "", age: 0, rank: ""}]
 
-    async function insertCard(cardText, url, category) {
+    async function insertCard(cardText, url, category, cardUsers, source, decks) {
+
         const res = await fetch(
           '/api/cards/insertCard',
           {
@@ -13,6 +14,9 @@ export default function CsvReader(){
               cardText: cardText,
               category: category,
               url: url,
+              cardUsers: cardUsers,
+              source: source,
+              decks: decks.split(","),
             }),
             headers: {
               'Content-Type': 'application/json'
@@ -23,9 +27,9 @@ export default function CsvReader(){
       } 
 
     const processCSV = (str, delim=';') => {
-        const headers = str.slice(0,str.indexOf('\n')).split(delim);
-        const rows = str.slice(str.indexOf('\n')+1).split('\n');
-
+        // gets headers and rows without double quotes
+        const headers = str.slice(0,str.indexOf('\n')).replace(/["]+/g, '').split(delim);
+        const rows = str.slice(str.indexOf('\n')+1).replace(/["]+/g, '').split('\n');
         const newArray = rows.map( row => {
             const values = row.split(delim);
             const eachObject = headers.reduce((obj, header, i) => {
@@ -34,13 +38,17 @@ export default function CsvReader(){
             }, {})
             return eachObject;
         })
-
         if (newArray.length>0){
-            newArray.forEach(element => insertCard(element.card, element.url, element.category));
+            newArray.forEach(element => {    
+                 insertCard(element.cardText, element.url, element.category, element.cardUsers, element.source, element.decks)
+                } 
+                 );
+           
+            
 
         }
-
         setCsvArray(newArray)
+
     }
 
     const submit = () => {
@@ -82,17 +90,26 @@ export default function CsvReader(){
             <>
                 <table>
                     <thead>
-                        <th>Card Text</th>
-                        <th>URL</th>
-                        <th>Category</th>
+                        <tr>
+                            <th>Card Text</th>
+                            <th>URL</th>
+                            <th>Category</th>
+                            <th>Card Users</th>
+                            <th>Source</th>
+                            <th>Decks</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {
                             csvArray.map((item, i) => (
                                 <tr key={i}>
-                                    <td>{item.card}</td>
+                                    <td>{item.cardText}</td>
                                     <td>{item.url}</td>
                                     <td>{item.category}</td>
+                                    <td>{item.cardUsers}</td>
+                                    <td>{item.source}</td>
+                                    <td>{item.decks}</td>
+
                                 </tr>
                             ))
                         }

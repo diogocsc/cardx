@@ -53,7 +53,7 @@ export default function Home({cardList}) {
       method: 'DELETE'
     })
     fetchCards();
-  }
+    }
   }
 
   const ownCard = async (cardId, email, ownedBy, cardText, category, cardUsers, source, url) => {
