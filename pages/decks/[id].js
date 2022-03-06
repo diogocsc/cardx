@@ -109,7 +109,7 @@ export default function Home({cardList, cardDownloadList, deckList}) {
         </h1>
 
         <CSVLink data={cardsToDownload} separator={";"} filename={deck.name+".csv"}>
-           Download me
+           Export to CSV
         </CSVLink>
 
         <p className={styles.description}>
