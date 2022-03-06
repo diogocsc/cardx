@@ -111,6 +111,9 @@ export default function Home({cardList, cardDownloadList, deckList}) {
         <CSVLink data={cardsToDownload} separator={";"} filename={deck.name+".csv"}>
            Export to CSV
         </CSVLink>
+        <Link href={"/game?deck="+deck.name}>
+           Play
+        </Link>
 
         <p className={styles.description}>
           <Link href={"/decks/deckEdit?id="+deck._id}>
