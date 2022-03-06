@@ -9,6 +9,8 @@ import { useRouter } from 'next/router';
 
 export default function Home() {
     const [ session, loading ] = useSession();
+    const { query } = useRouter();
+
 
   // When rendering client side don't display anything until loading is complete
   if (typeof window !== 'undefined' && loading) return null
@@ -19,7 +21,6 @@ export default function Home() {
   // If session exists, display content
   const isAdmin = session.user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN;
 
-    const { query } = useRouter();
 
     
 var playCards;
