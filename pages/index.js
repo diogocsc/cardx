@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import { useState } from 'react'
 import Layout from '../components/layout'
@@ -55,6 +56,11 @@ function CategoryDecks({categoryName}) {
           {url && <img src={url} className={styles.deck} /> }
           {name} 
         </a>
+        <Link  href={"/game?deck="+name}>
+          <a className={styles.button}>
+            Play 
+          </a>
+        </Link>
        </div>
       ))}
      
