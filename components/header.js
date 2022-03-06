@@ -38,9 +38,8 @@ export default function Header () {
             <img className={styles.email} src={user.picture} alt={user.name} width="30px" height="30px"/>
               Signed in as 
                 <strong className={styles.email}>{user.email || user.name}</strong>
-                <Link href="/api/auth/logout">
-                  <a>Logout</a>
-                </Link>
+                <a href="/api/auth/logout">Logout</a>
+
               </span>
              
           </>}
