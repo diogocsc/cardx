@@ -47,15 +47,24 @@ function CategoryDecks({categoryName}) {
   if (error) return <div>Failed to load</div>
   if (!data) return <div>Loading...</div>
 
+  function getFirstLastName(fullName){
+
+    let name=fullName.split(" ");
+    return name[0]+" "+name[name.length-1];
+
+  }
+
   return (
     <div className={styles.categoryLine}>
   
-    {data.map(({ _id, name, url }) => (
+    {data.map(({ _id, name, url, createdByName, description }) => (
       <div className={styles.card} key={name} >
         <a href={"/decks/"+_id} >
-          {url && <img src={url} className={styles.deck} /> }
+        {url && <img src={url} className={styles.deckImage} /> }     
           {name} 
         </a>
+        <div className={styles.description}>{description}</div>
+        <div className={styles.createdBy}><strong>Created by:</strong> <br/>{getFirstLastName(createdByName)}</div>
         <Link  href={"/game?deck="+name}>
           <a className={styles.button}>
             Play 
