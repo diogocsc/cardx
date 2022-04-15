@@ -24,6 +24,7 @@ export default function Form() {
           name: event.target.name.value,
           description: event.target.description.value,
           url: event.target.url.value,
+          order: event.target.order.value,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -37,6 +38,7 @@ export default function Form() {
           name: event.target.name.value,
           description: event.target.description.value,
           url: event.target.url.value,
+          order: event.target.order.value,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -85,6 +87,11 @@ export default function Form() {
         <label className={utilStyles.input_label} htmlFor="url">category Image URL</label>
         <div className={utilStyles.input}>
           <input className={utilStyles.input_field} id="url" name="url" type="text" defaultValue={category.url} />
+        </div>
+        <label className={utilStyles.input_label} htmlFor="order">category Order</label>
+
+        <div className={utilStyles.input}>
+          <input className={utilStyles.input_field} id="order" name="order" type="number" defaultValue={category.order} />
         </div>
         <button className={utilStyles.card_button} type="submit">Submit</button>
         <br />

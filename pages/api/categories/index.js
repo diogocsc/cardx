@@ -12,7 +12,7 @@ export default withApiAuthRequired( async (req, res) => {
         const client = await clientPromise;
         const collection = await client.db().collection('categories');
         try {
-            let mySort= {createdOn:-1, lastModified: -1, name: 1};
+            let mySort= {order:1,createdOn:-1, lastModified: -1, name: 1};
             const categories= await collection.find().sort(mySort).toArray();
             res.json(categories);
         } catch(err){

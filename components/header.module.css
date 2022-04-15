@@ -30,7 +30,8 @@
   display: inherit;  
   text-overflow: ellipsis;
   z-index: 1;
-  background-color: rgba(0,0,0,.15);;
+  background-color: white;
+
 }
 
 .email {
@@ -98,11 +99,19 @@
 .navItem {
   display: inline-block;
   margin-right: 1rem;
+  padding-right: 30px;
+}
+
+.underline {
+  text-decoration: underline;
+  text-underline-offset: 20px;
 }
 
 .navigation {
-  background-color: rgba(0,0,0,.15);
+  background-color: rgba(0,0,0,0);
   text-align: left;
   padding-left:1rem;
   width:80%;
+  font-weight: bold;
+  background-color: white;
 }

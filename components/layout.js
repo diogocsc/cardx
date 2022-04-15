@@ -3,10 +3,10 @@ import Footer from './footer'
 import styles from './layout.module.css'
 
 
-export default function Layout ({children}) {
+export default function Layout ({children, activeMenu}) {
   return (
     <>
-      <Header/>
+      <Header activeMenu = {activeMenu}/>
       <div className={styles.container}>
       <main className={styles.main}>
         {children}

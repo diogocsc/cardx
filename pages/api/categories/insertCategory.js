@@ -16,6 +16,7 @@ export default withApiAuthRequired(async (req, res) => {
       name: req.body.name,
       description: req.body.description,
       url: req.body.url,
+      order: req.body.order,
       createdBy: user.email,
       createdByName: user.name,
       createdOn: new Date(),

@@ -5,12 +5,23 @@ import styles from './header.module.css'
 // The approach used in this component shows how to build a sign in and sign out
 // component that works on pages which support both client and server side
 // rendering, and avoids any flash incorrect content on initial page load.
-export default function Header () {
+export default function Header ({activeMenu}) {
   const { user, error, isLoading } = useUser();
     // If user exists, display content
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
   const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
+  function navItemClass(activeMenu, currentMenu) {
+
+    switch(currentMenu){
+      case activeMenu:
+        return styles.navItem + ' '+styles.underline
+      default:
+        return styles.navItem
+    }
+
+  }
+
   return (
     <header>
       <noscript>
@@ -20,12 +31,10 @@ export default function Header () {
       {user && <>
       <nav className={styles.navigation}>
         <ul className={styles.navItems}>
-          <li className={styles.navItem}><Link href="/"><a>Home</a></Link></li>
-          <li className={styles.navItem}><Link href="/myDecks"><a>My Decks</a></Link></li>
-          <li className={styles.navItem}><Link href="/myCards"><a>My Cards</a></Link></li>
-          <li className={styles.navItem}><Link href="/decks/deckEdit"><a>New Deck</a></Link></li>
-          <li className={styles.navItem}><Link href="/cards/cardEdit"><a>New Card</a></Link></li>
-          {isAdmin && <li className={styles.navItem}><Link href="/categories"><a>Categories</a></Link></li>}
+          <li className={navItemClass(activeMenu,'Home')}><Link href="/"><a>Home</a></Link></li>
+          <li className={navItemClass(activeMenu,'myDecks')}><Link href="/myDecks"><a>My Decks</a></Link></li>
+          <li className={navItemClass(activeMenu,'myCards')}><Link href="/myCards"><a>My Cards</a></Link></li>
+          {isAdmin && <li className={navItemClass(activeMenu,'Categories')}><Link href="/categories"><a>Categories</a></Link></li>}
 
         </ul>
       </nav>

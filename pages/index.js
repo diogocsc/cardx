@@ -21,7 +21,7 @@ const CategoryDecks = dynamic(() => import('../components/categoryDecks'))
 async function fetchCategoriesFromDB() {
   const client = await clientPromise;
   const collection = await client.db().collection('categories');
-  let mySort= {name: 1};
+  let mySort= {order:1, name: 1};
   const categories= await collection.find().sort(mySort).toArray();
   const categoryList = JSON.parse(JSON.stringify(categories));
   return categoryList;
@@ -80,16 +80,14 @@ export default function Home({categoryList}) {
 
 
   return (
-    <Layout>
+    <Layout activeMenu='Home'>
 
       <Head>
         <title>CardX</title>
         <meta name="description" content="A Card Repository" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <h1>
-        Choose a Deck
-      </h1>
+
       <div>   
         {categories.map(({_id, name, url }) => (
           <>

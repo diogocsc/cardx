@@ -97,7 +97,7 @@ if (!user) { return  <Layout><AccessDenied/></Layout> }
 const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null;
 
   return (
-    <Layout>
+    <Layout activeMenu='myDecks'>
 
       <Head>
         <title>CardX - My Decks</title>
@@ -108,6 +108,7 @@ const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null
       <h1>
           My Decks
         </h1>
+        <Link href="/decks/deckEdit"><a>New Deck</a></Link>
 
         <div className={styles.grid}>
         

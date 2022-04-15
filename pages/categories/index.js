@@ -14,7 +14,7 @@ async function fetchCategoriesFromDB(session) {
 
   const client = await clientPromise;
   const collection = await client.db().collection('categories');
-  let mySort= {createdOn:-1, lastModified: -1, name: 1};
+  let mySort= {order:1, createdOn:-1, lastModified: -1, name: 1};
   const categories= await collection.find({ownedBy:{$ne: session.user.email}}).sort(mySort).toArray();
   const categoryList = JSON.parse(JSON.stringify(categories));
   return categoryList;
@@ -65,7 +65,7 @@ const isAdmin = user ? user.email === process.env.NEXT_PUBLIC_EMAIL_ADMIN : null
 
 
   return (
-    <Layout>
+    <Layout activeMenu='Categories'>
 
       <Head>
         <title>CardX - Categories</title>

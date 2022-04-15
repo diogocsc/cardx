@@ -17,7 +17,7 @@ export default withApiAuthRequired( async (req, res) => {
                 res.json(r);
             }
             else if(req.method == 'PATCH'){
-                const category = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "name": req.body.name, "description": req.body.description, "url": req.body.url},
+                const category = await collection.updateOne({_id: ObjectId(req.query.id)},{ $set: { "name": req.body.name, "description": req.body.description, "url": req.body.url,"order":req.body.order},
                 $currentDate: { lastModified: true } });
                 res.json(category);
             }
