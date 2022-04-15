@@ -171,6 +171,21 @@
 
 }
 
+.cardsCount{
+
+  font-size: 15px;
+  color: #425466;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color:#e4ecf7;
+  width:80px;
+  text-align:center;
+  padding:5px;
+  position:absolute;
+  top: 1.5rem;
+  right:10px;
+}
+
 .card:hover,
 .card:focus,
 .card:active {

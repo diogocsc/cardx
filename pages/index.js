@@ -39,6 +39,23 @@ return {
 }
 
 
+const fetcher1 = (...args) => fetch(...args).then((res) => res.json())
+
+function DeckCardsCount({deckId}) {
+  const { data:countCards, error } = useSWR('/api/decks/'+deckId+'/countCards', fetcher1)
+
+  if (error) return <div>Failed to load</div>
+  if (!countCards) return <div>Loading...</div>
+
+  return (
+    <div className={styles.cardsCount}>
+        {countCards+' Cards'} 
+  </div>
+  )
+}
+
+
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
 function CategoryDecks({categoryName}) {
@@ -54,14 +71,17 @@ function CategoryDecks({categoryName}) {
 
   }
 
+  
+
   return (
     <div className={styles.categoryLine}>
   
-    {data.map(({ _id, name, url, createdByName, description }) => (
+    {data.map(({ _id, name, url, createdByName, description,cardsCount }) => (
       <div className={styles.card} key={name} >
         <a href={"/decks/"+_id} >
         {url && <img src={url} className={styles.deckImage} /> }     
           {name} 
+          <DeckCardsCount deckId={_id} />       
         </a>
         <div className={styles.description}>{description}</div>
         <div className={styles.createdBy}><strong>Created by:</strong> <br/>{getFirstLastName(createdByName)}</div>
@@ -76,6 +96,7 @@ function CategoryDecks({categoryName}) {
   </div>
   )
 }
+
 
 
 export default function Home({categoryList}) {
